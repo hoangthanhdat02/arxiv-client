@@ -37,6 +37,13 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
     // Track active holders to deliver zoom actions
     private final Map<Integer, PageViewHolder> activeHolders = new HashMap<>();
 
+    /**
+     * Creates a page adapter with a bitmap cache sized to one quarter of the available heap.
+     *
+     * @param context context used to obtain display density for rendering
+     * @param pdfRenderer open renderer used by the background worker
+     * @param totalPages number of pages exposed by the adapter
+     */
     public PdfPagerAdapter(Context context, PdfRenderer pdfRenderer, int totalPages) {
         this.context = context;
         this.pdfRenderer = pdfRenderer;
@@ -46,6 +53,7 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         int cacheSize = maxMemory / 4;
         bitmapCache = new LruCache<Integer, Bitmap>(cacheSize) {
+            /** Returns the bitmap's memory usage in kilobytes for cache accounting. */
             @Override
             protected int sizeOf(Integer key, Bitmap bitmap) {
                 return bitmap.getByteCount() / 1024;
@@ -53,6 +61,7 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
         };
     }
 
+    /** Inflates a PDF page layout and wraps its image and loading indicator in a holder. */
     @NonNull
     @Override
     public PageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -60,6 +69,10 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
         return new PageViewHolder(view);
     }
 
+    /**
+     * Displays a cached page or renders it in the background, then updates the holder
+     * on the main thread if it is still bound to the requested page.
+     */
     @Override
     public void onBindViewHolder(@NonNull PageViewHolder holder, int position) {
         holder.boundPosition = position;
@@ -119,6 +132,7 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
         });
     }
 
+    /** Removes a recycled holder from active pages and clears its zoom and bitmap. */
     @Override
     public void onViewRecycled(@NonNull PageViewHolder holder) {
         super.onViewRecycled(holder);
@@ -127,16 +141,24 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
         holder.zoomableImageView.setImageBitmap(null);
     }
 
+    /** Returns the number of pages in the document. */
     @Override
     public int getItemCount() {
         return totalPages;
     }
 
+    /**
+     * Finds the image view currently bound to a page for toolbar zoom actions.
+     *
+     * @param position zero-based page index
+     * @return the bound image view, or {@code null} if no active holder exists
+     */
     public ZoomableImageView getActivePageImageView(int position) {
         PageViewHolder holder = activeHolders.get(position);
         return holder != null ? holder.zoomableImageView : null;
     }
 
+    /** Clears holder references and cached bitmaps, and requests worker shutdown. */
     public void cleanUp() {
         activeHolders.clear();
         bitmapCache.evictAll();
@@ -148,6 +170,7 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
         final ProgressBar progressBar;
         int boundPosition = -1;
 
+        /** Binds the page image and loading indicator from the supplied item layout. */
         public PageViewHolder(@NonNull View itemView) {
             super(itemView);
             zoomableImageView = itemView.findViewById(R.id.zoomable_image_page);

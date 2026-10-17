@@ -33,21 +33,25 @@ public class ZoomableImageView extends AppCompatImageView {
     private final PointF lastTouch = new PointF();
     private boolean isDragging = false;
 
+    /** Creates a zoomable image view programmatically and initializes gesture detection. */
     public ZoomableImageView(@NonNull Context context) {
         super(context);
         init(context);
     }
 
+    /** Creates a zoomable image view from XML attributes and initializes gesture detection. */
     public ZoomableImageView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
+    /** Creates a zoomable image view with XML attributes and a default style attribute. */
     public ZoomableImageView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
     }
 
+    /** Enables matrix-based image transforms and installs pinch and double-tap detectors. */
     private void init(Context context) {
         setScaleType(ScaleType.MATRIX);
 
@@ -55,6 +59,7 @@ public class ZoomableImageView extends AppCompatImageView {
         gestureDetector = new GestureDetector(context, new GestureListener());
     }
 
+    /** Refits the image after a layout change or while it is at its base zoom level. */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -63,6 +68,10 @@ public class ZoomableImageView extends AppCompatImageView {
         }
     }
 
+    /**
+     * Fits and centers the drawable while preserving its aspect ratio, resetting relative zoom.
+     * Does nothing until both the drawable and view have positive dimensions.
+     */
     public void fitToScreen() {
         Drawable drawable = getDrawable();
         if (drawable == null || drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
@@ -94,6 +103,12 @@ public class ZoomableImageView extends AppCompatImageView {
         currentScale = 1.0f;
     }
 
+    /**
+     * Dispatches pinch and tap gestures, pans zoomed content, and manages parent interception.
+     *
+     * @param event touch event to process
+     * @return whether the touch event was handled
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean scaleHandled = scaleDetector.onTouchEvent(event);
@@ -143,6 +158,7 @@ public class ZoomableImageView extends AppCompatImageView {
         return scaleHandled || gestureHandled || super.onTouchEvent(event);
     }
 
+    /** Centers content smaller than the view and keeps larger content from exposing its edges. */
     private void clampMatrix() {
         RectF rect = getTransformedRect();
         if (rect == null) return;
@@ -172,6 +188,7 @@ public class ZoomableImageView extends AppCompatImageView {
         matrix.postTranslate(deltaX, deltaY);
     }
 
+    /** Returns the drawable bounds after transformation, or {@code null} without a drawable. */
     private RectF getTransformedRect() {
         Drawable drawable = getDrawable();
         if (drawable == null) return null;
@@ -181,22 +198,34 @@ public class ZoomableImageView extends AppCompatImageView {
         return rect;
     }
 
+    /** Scales the image by 1.3 around the view center, subject to the maximum zoom. */
     public void zoomIn() {
         applyScale(1.3f, getWidth() / 2f, getHeight() / 2f);
     }
 
+    /** Scales the image by 0.77 around the view center, subject to the minimum zoom. */
     public void zoomOut() {
         applyScale(0.77f, getWidth() / 2f, getHeight() / 2f);
     }
 
+    /** Restores the drawable to its centered fit within the view. */
     public void resetZoom() {
         fitToScreen();
     }
 
+    /** Returns whether relative zoom exceeds the fitted scale by more than five percent. */
     public boolean isZoomed() {
         return currentScale > 1.05f;
     }
 
+    /**
+     * Applies a relative zoom around a focal point, clamps scale and position, and updates
+     * whether the parent may intercept touch events.
+     *
+     * @param scaleFactor multiplier applied to the current relative zoom
+     * @param focusX horizontal focal coordinate in view pixels
+     * @param focusY vertical focal coordinate in view pixels
+     */
     private void applyScale(float scaleFactor, float focusX, float focusY) {
         float targetScale = currentScale * scaleFactor;
         if (targetScale < minScale) {
@@ -219,6 +248,7 @@ public class ZoomableImageView extends AppCompatImageView {
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        /** Applies the detected pinch scale around its focus and consumes the gesture. */
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             applyScale(detector.getScaleFactor(), detector.getFocusX(), detector.getFocusY());
@@ -227,6 +257,7 @@ public class ZoomableImageView extends AppCompatImageView {
     }
 
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        /** Toggles between fitted size and a 2.5-times zoom around the double-tap location. */
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             if (currentScale > 1.05f) {
