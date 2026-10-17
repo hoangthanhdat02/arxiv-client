@@ -24,6 +24,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -77,6 +78,7 @@ public class PdfReaderActivity extends AppCompatActivity {
     private int currentPage = 1;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final OkHttpClient httpClient = new OkHttpClient();
+    private okhttp3.Call activeDownloadCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -271,34 +273,54 @@ public class PdfReaderActivity extends AppCompatActivity {
         showLoading("Đang tải tệp PDF từ arXiv...");
 
         new Thread(() -> {
+            File tempFile = new File(destinationFile.getAbsolutePath() + ".tmp");
             try {
                 Request request = new Request.Builder()
                         .url(url)
                         .header("User-Agent", "arXiv-Mobile-Client/1.0")
                         .build();
 
-                Response response = httpClient.newCall(request).execute();
-                if (!response.isSuccessful() || response.body() == null) {
-                    mainHandler.post(() -> showError("Không thể tải tài liệu từ máy chủ (Mã lỗi: " + response.code() + ").\nNếu đang bật Chế độ máy bay, vui lòng mở các bài báo đã tải offline."));
-                    return;
+                activeDownloadCall = httpClient.newCall(request);
+                try (Response response = activeDownloadCall.execute()) {
+                    if (!response.isSuccessful() || response.body() == null) {
+                        if (tempFile.exists()) tempFile.delete();
+                        mainHandler.post(() -> {
+                            if (isFinishing() || isDestroyed()) return;
+                            showError("Không thể tải tài liệu từ máy chủ (Mã lỗi: " + response.code() + ").\nNếu đang bật Chế độ máy bay, vui lòng mở các bài báo đã tải offline.");
+                        });
+                        return;
+                    }
+
+                    try (InputStream is = response.body().byteStream();
+                         FileOutputStream fos = new FileOutputStream(tempFile)) {
+                        byte[] buffer = new byte[8192];
+                        int read;
+                        while ((read = is.read(buffer)) != -1) {
+                            fos.write(buffer, 0, read);
+                        }
+                        fos.flush();
+                    }
+
+                    if (tempFile.renameTo(destinationFile) || (!destinationFile.exists() && tempFile.length() > 0)) {
+                        File finalFile = destinationFile.exists() ? destinationFile : tempFile;
+                        mainHandler.post(() -> {
+                            if (isFinishing() || isDestroyed()) return;
+                            initRendererWithFile(finalFile);
+                        });
+                    } else {
+                        throw new IOException("Không thể lưu file đích.");
+                    }
                 }
-
-                InputStream is = response.body().byteStream();
-                FileOutputStream fos = new FileOutputStream(destinationFile);
-                byte[] buffer = new byte[8192];
-                int read;
-                while ((read = is.read(buffer)) != -1) {
-                    fos.write(buffer, 0, read);
-                }
-                fos.flush();
-                fos.close();
-                is.close();
-
-                mainHandler.post(() -> initRendererWithFile(destinationFile));
-
             } catch (Exception e) {
+                if (tempFile.exists()) tempFile.delete();
+                if (destinationFile.exists()) destinationFile.delete();
                 e.printStackTrace();
-                mainHandler.post(() -> showError("Không thể kết nối máy chủ.\nNếu đang bật Chế độ máy bay, vui lòng mở các bài báo trong tab Đã lưu."));
+                mainHandler.post(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    showError("Không thể kết nối máy chủ.\nNếu đang bật Chế độ máy bay, vui lòng mở các bài báo trong tab Đã lưu.");
+                });
+            } finally {
+                activeDownloadCall = null;
             }
         }).start();
     }
@@ -320,6 +342,7 @@ public class PdfReaderActivity extends AppCompatActivity {
 
             // Restore saved page
             int targetPage = Math.min(Math.max(1, currentPage), totalPages);
+            currentPage = targetPage;
             viewPagerPdf.setCurrentItem(targetPage - 1, false);
             seekBarPages.setProgress(targetPage);
 
@@ -382,21 +405,37 @@ public class PdfReaderActivity extends AppCompatActivity {
     }
 
     private void closeRenderer() {
-        try {
-            if (pagerAdapter != null) {
-                pagerAdapter.cleanUp();
-                pagerAdapter = null;
+        if (activeDownloadCall != null) {
+            try {
+                activeDownloadCall.cancel();
+            } catch (Exception ignored) {
             }
-            if (pdfRenderer != null) {
-                pdfRenderer.close();
+            activeDownloadCall = null;
+        }
+
+        if (pagerAdapter != null) {
+            pagerAdapter.cleanUp();
+            pagerAdapter = null;
+        }
+
+        if (pdfRenderer != null) {
+            synchronized (pdfRenderer) {
+                try {
+                    pdfRenderer.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 pdfRenderer = null;
             }
-            if (fileDescriptor != null) {
+        }
+
+        if (fileDescriptor != null) {
+            try {
                 fileDescriptor.close();
-                fileDescriptor = null;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            fileDescriptor = null;
         }
     }
 
