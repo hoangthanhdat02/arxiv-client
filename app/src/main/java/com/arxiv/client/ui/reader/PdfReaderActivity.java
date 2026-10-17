@@ -24,6 +24,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -271,34 +272,47 @@ public class PdfReaderActivity extends AppCompatActivity {
         showLoading("Đang tải tệp PDF từ arXiv...");
 
         new Thread(() -> {
+            File temporaryFile = null;
             try {
                 Request request = new Request.Builder()
                         .url(url)
                         .header("User-Agent", "arXiv-Mobile-Client/1.0")
                         .build();
 
-                Response response = httpClient.newCall(request).execute();
-                if (!response.isSuccessful() || response.body() == null) {
-                    mainHandler.post(() -> showError("Không thể tải tài liệu từ máy chủ (Mã lỗi: " + response.code() + ").\nNếu đang bật Chế độ máy bay, vui lòng mở các bài báo đã tải offline."));
-                    return;
+                temporaryFile = File.createTempFile("pdf_", ".tmp", destinationFile.getParentFile());
+                try (Response response = httpClient.newCall(request).execute()) {
+                    if (!response.isSuccessful() || response.body() == null) {
+                        mainHandler.post(() -> showError("Không thể tải tài liệu từ máy chủ (Mã lỗi: " + response.code() + ").\nNếu đang bật Chế độ máy bay, vui lòng mở các bài báo đã tải offline."));
+                        return;
+                    }
+
+                    try (InputStream is = response.body().byteStream();
+                         FileOutputStream fos = new FileOutputStream(temporaryFile)) {
+                        byte[] buffer = new byte[8192];
+                        int read;
+                        while ((read = is.read(buffer)) != -1) {
+                            fos.write(buffer, 0, read);
+                        }
+                        fos.flush();
+                    }
                 }
 
-                InputStream is = response.body().byteStream();
-                FileOutputStream fos = new FileOutputStream(destinationFile);
-                byte[] buffer = new byte[8192];
-                int read;
-                while ((read = is.read(buffer)) != -1) {
-                    fos.write(buffer, 0, read);
+                if (!temporaryFile.renameTo(destinationFile)) {
+                    throw new IOException("Could not move PDF download to cache");
                 }
-                fos.flush();
-                fos.close();
-                is.close();
 
-                mainHandler.post(() -> initRendererWithFile(destinationFile));
+                mainHandler.post(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    initRendererWithFile(destinationFile);
+                });
 
             } catch (Exception e) {
                 e.printStackTrace();
                 mainHandler.post(() -> showError("Không thể kết nối máy chủ.\nNếu đang bật Chế độ máy bay, vui lòng mở các bài báo trong tab Đã lưu."));
+            } finally {
+                if (temporaryFile != null) {
+                    temporaryFile.delete();
+                }
             }
         }).start();
     }
@@ -320,6 +334,7 @@ public class PdfReaderActivity extends AppCompatActivity {
 
             // Restore saved page
             int targetPage = Math.min(Math.max(1, currentPage), totalPages);
+            currentPage = targetPage;
             viewPagerPdf.setCurrentItem(targetPage - 1, false);
             seekBarPages.setProgress(targetPage);
 
@@ -388,9 +403,15 @@ public class PdfReaderActivity extends AppCompatActivity {
                 pagerAdapter = null;
             }
             if (pdfRenderer != null) {
-                pdfRenderer.close();
+                synchronized (pdfRenderer) {
+                    pdfRenderer.close();
+                }
                 pdfRenderer = null;
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
             if (fileDescriptor != null) {
                 fileDescriptor.close();
                 fileDescriptor = null;

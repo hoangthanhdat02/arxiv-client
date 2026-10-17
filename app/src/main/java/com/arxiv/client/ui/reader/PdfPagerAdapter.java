@@ -83,18 +83,21 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
                     try {
                         PdfRenderer.Page page = pdfRenderer.openPage(position);
 
-                        // High DPI rendering scale (2.0x) for sharp mathematical formulas
-                        float density = context.getResources().getDisplayMetrics().density;
-                        float renderScale = Math.max(1.5f, density);
+                        try {
+                            // High DPI rendering scale (2.0x) for sharp mathematical formulas
+                            float density = context.getResources().getDisplayMetrics().density;
+                            float renderScale = Math.max(1.5f, density);
 
-                        int targetWidth = (int) (page.getWidth() * renderScale);
-                        int targetHeight = (int) (page.getHeight() * renderScale);
+                            int targetWidth = (int) (page.getWidth() * renderScale);
+                            int targetHeight = (int) (page.getHeight() * renderScale);
 
-                        renderedBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
-                        renderedBitmap.eraseColor(Color.WHITE);
+                            renderedBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
+                            renderedBitmap.eraseColor(Color.WHITE);
 
-                        page.render(renderedBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-                        page.close();
+                            page.render(renderedBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                        } finally {
+                            page.close();
+                        }
 
                         bitmapCache.put(position, renderedBitmap);
                     } catch (Exception e) {
