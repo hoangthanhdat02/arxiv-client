@@ -36,30 +36,12 @@ public class FilterBottomSheetDialog extends BottomSheetDialogFragment {
         ChipGroup chipGroupCategory = view.findViewById(R.id.chip_group_category);
         RadioGroup radioGroupSort = view.findViewById(R.id.radio_group_sort);
         MaterialButton btnApply = view.findViewById(R.id.btn_apply_filter);
+        MaterialButton btnReset = view.findViewById(R.id.btn_reset_filter);
 
-        if ("cs.AI".equals(initialCategory)) {
-            chipGroupCategory.check(R.id.chip_ai);
-        } else if ("cs.LG".equals(initialCategory)) {
-            chipGroupCategory.check(R.id.chip_lg);
-        } else {
-            chipGroupCategory.check(R.id.chip_all);
-        }
-
-        if ("submittedDate".equals(initialSort)) {
-            radioGroupSort.check(R.id.radio_date);
-        } else {
-            radioGroupSort.check(R.id.radio_relevance);
-        }
+        restoreSelection(chipGroupCategory, radioGroupSort, initialCategory, initialSort);
 
         btnApply.setOnClickListener(v -> {
-            String selectedCategory = "";
-            int selectedChipId = chipGroupCategory.getCheckedChipId();
-            if (selectedChipId == R.id.chip_ai) {
-                selectedCategory = "cs.AI";
-            } else if (selectedChipId == R.id.chip_lg) {
-                selectedCategory = "cs.LG";
-            }
-
+            String selectedCategory = resolveCategory(chipGroupCategory.getCheckedChipId());
             String selectedSort = (radioGroupSort.getCheckedRadioButtonId() == R.id.radio_date)
                     ? "submittedDate"
                     : "relevance";
@@ -70,6 +52,34 @@ public class FilterBottomSheetDialog extends BottomSheetDialogFragment {
             dismiss();
         });
 
+        // Reset to defaults: All categories + Relevance sort
+        btnReset.setOnClickListener(v -> {
+            chipGroupCategory.check(R.id.chip_all);
+            radioGroupSort.check(R.id.radio_relevance);
+        });
+
         return view;
+    }
+
+    private void restoreSelection(ChipGroup chipGroup, RadioGroup radioGroup, String category, String sort) {
+        if ("cs.AI".equals(category)) {
+            chipGroup.check(R.id.chip_ai);
+        } else if ("cs.LG".equals(category)) {
+            chipGroup.check(R.id.chip_lg);
+        } else {
+            chipGroup.check(R.id.chip_all);
+        }
+
+        if ("submittedDate".equals(sort)) {
+            radioGroup.check(R.id.radio_date);
+        } else {
+            radioGroup.check(R.id.radio_relevance);
+        }
+    }
+
+    private String resolveCategory(int chipId) {
+        if (chipId == R.id.chip_ai) return "cs.AI";
+        if (chipId == R.id.chip_lg) return "cs.LG";
+        return "";
     }
 }
