@@ -80,6 +80,7 @@ public class PdfReaderActivity extends AppCompatActivity {
     private final OkHttpClient httpClient = new OkHttpClient();
     private okhttp3.Call activeDownloadCall;
 
+    /** Initializes reader state and controls, then loads the paper supplied by the intent. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +99,7 @@ public class PdfReaderActivity extends AppCompatActivity {
         loadPdfDocument();
     }
 
+    /** Binds reader views, restores the saved page, and connects the retry action. */
     private void initViews() {
         toolbar = findViewById(R.id.toolbar);
         btnZoomIn = findViewById(R.id.btn_zoom_in);
@@ -126,10 +128,12 @@ public class PdfReaderActivity extends AppCompatActivity {
         btnRetry.setOnClickListener(v -> loadPdfDocument());
     }
 
+    /** Makes the toolbar navigation action close the reader. */
     private void setupToolbar() {
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
+    /** Connects toolbar zoom actions to the currently bound page image. */
     private void setupZoomControls() {
         btnZoomIn.setOnClickListener(v -> {
             ZoomableImageView currentView = getCurrentPageImageView();
@@ -147,6 +151,7 @@ public class PdfReaderActivity extends AppCompatActivity {
         });
     }
 
+    /** Returns the current page image, or {@code null} if it is not bound yet. */
     private ZoomableImageView getCurrentPageImageView() {
         if (pagerAdapter != null && viewPagerPdf != null) {
             return pagerAdapter.getActivePageImageView(viewPagerPdf.getCurrentItem());
@@ -154,6 +159,7 @@ public class PdfReaderActivity extends AppCompatActivity {
         return null;
     }
 
+    /** Connects page buttons and the slider, and saves progress when the pager changes pages. */
     private void setupPageNavigation() {
         // Prev & Next Buttons
         btnPrevPage.setOnClickListener(v -> {
@@ -170,6 +176,7 @@ public class PdfReaderActivity extends AppCompatActivity {
 
         // SeekBar slider for jumping directly across pages
         seekBarPages.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            /** Converts user slider changes from one-based pages to zero-based pager indices. */
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser && viewPagerPdf != null) {
@@ -178,12 +185,15 @@ public class PdfReaderActivity extends AppCompatActivity {
                 }
             }
 
+            /** Leaves page navigation to progress changes when slider dragging begins. */
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            /** Requires no additional action when slider dragging ends. */
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         // ViewPager2 page change listener
         viewPagerPdf.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            /** Updates the one-based page state, slider, and saved reading progress. */
             @Override
             public void onPageSelected(int position) {
                 currentPage = position + 1;
@@ -197,6 +207,7 @@ public class PdfReaderActivity extends AppCompatActivity {
         });
     }
 
+    /** Shows existing offline availability or connects the download action and its callbacks. */
     private void setupDownloadButton() {
         if (paper == null) return;
 
@@ -212,11 +223,13 @@ public class PdfReaderActivity extends AppCompatActivity {
             btnDownloadOffline.setEnabled(false);
 
             DownloadService.downloadPdf(this, paper.getPdfUrl(), paper.getId(), new DownloadService.DownloadCallback() {
+                /** Displays the download completion percentage on the button. */
                 @Override
                 public void onProgress(int progressPercent) {
                     btnDownloadOffline.setText(progressPercent + "%");
                 }
 
+                /** Marks the paper as available offline and records its local file path. */
                 @Override
                 public void onSuccess(File downloadedFile) {
                     btnDownloadOffline.setText("Đã lưu Offline");
@@ -226,6 +239,7 @@ public class PdfReaderActivity extends AppCompatActivity {
                     Toast.makeText(PdfReaderActivity.this, "Đã lưu vào bộ nhớ máy ảo! Có thể đọc khi bật Chế độ máy bay.", Toast.LENGTH_LONG).show();
                 }
 
+                /** Re-enables the download action and displays the failure message. */
                 @Override
                 public void onError(String errorMessage) {
                     btnDownloadOffline.setText("Tải Offline");
@@ -269,11 +283,19 @@ public class PdfReaderActivity extends AppCompatActivity {
         downloadToCacheAndRender(paper.getPdfUrl(), cacheFile);
     }
 
+    /**
+     * Downloads a PDF to a temporary file on a background thread, then publishes it
+     * to the cache. Opens it if the activity is still acti    /**
+     * Downloads a paper's PDF to a temporary file, moves it to destination, and displays it.
+     *
+     * @param url source PDF URL
+     * @param destinationFile cache path published after the download completes
+     */
     private void downloadToCacheAndRender(String url, File destinationFile) {
         showLoading("Đang tải tệp PDF từ arXiv...");
 
         new Thread(() -> {
-            File tempFile = new File(destinationFile.getAbsolutePath() + ".tmp");
+            File temporaryFile = null;
             try {
                 Request request = new Request.Builder()
                         .url(url)
@@ -281,9 +303,9 @@ public class PdfReaderActivity extends AppCompatActivity {
                         .build();
 
                 activeDownloadCall = httpClient.newCall(request);
+                temporaryFile = File.createTempFile("pdf_", ".tmp", destinationFile.getParentFile());
                 try (Response response = activeDownloadCall.execute()) {
                     if (!response.isSuccessful() || response.body() == null) {
-                        if (tempFile.exists()) tempFile.delete();
                         mainHandler.post(() -> {
                             if (isFinishing() || isDestroyed()) return;
                             showError("Không thể tải tài liệu từ máy chủ (Mã lỗi: " + response.code() + ").\nNếu đang bật Chế độ máy bay, vui lòng mở các bài báo đã tải offline.");
@@ -292,7 +314,7 @@ public class PdfReaderActivity extends AppCompatActivity {
                     }
 
                     try (InputStream is = response.body().byteStream();
-                         FileOutputStream fos = new FileOutputStream(tempFile)) {
+                         FileOutputStream fos = new FileOutputStream(temporaryFile)) {
                         byte[] buffer = new byte[8192];
                         int read;
                         while ((read = is.read(buffer)) != -1) {
@@ -300,20 +322,18 @@ public class PdfReaderActivity extends AppCompatActivity {
                         }
                         fos.flush();
                     }
-
-                    if (tempFile.renameTo(destinationFile) || (!destinationFile.exists() && tempFile.length() > 0)) {
-                        File finalFile = destinationFile.exists() ? destinationFile : tempFile;
-                        mainHandler.post(() -> {
-                            if (isFinishing() || isDestroyed()) return;
-                            initRendererWithFile(finalFile);
-                        });
-                    } else {
-                        throw new IOException("Không thể lưu file đích.");
-                    }
                 }
+
+                if (!temporaryFile.renameTo(destinationFile)) {
+                    throw new IOException("Could not move PDF download to cache");
+                }
+
+                mainHandler.post(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    initRendererWithFile(destinationFile);
+                });
+
             } catch (Exception e) {
-                if (tempFile.exists()) tempFile.delete();
-                if (destinationFile.exists()) destinationFile.delete();
                 e.printStackTrace();
                 mainHandler.post(() -> {
                     if (isFinishing() || isDestroyed()) return;
@@ -321,10 +341,19 @@ public class PdfReaderActivity extends AppCompatActivity {
                 });
             } finally {
                 activeDownloadCall = null;
+                if (temporaryFile != null && temporaryFile.exists()) {
+                    temporaryFile.delete();
+                }
             }
         }).start();
     }
 
+    /**
+     * Opens a local PDF, replaces the renderer and adapter, and restores the saved page
+     * within the document's bounds. Displays an error if initialization fails.
+     *
+     * @param pdfFile local PDF file to open for reading
+     */
     private void initRendererWithFile(File pdfFile) {
         try {
             closeRenderer();
@@ -355,10 +384,17 @@ public class PdfReaderActivity extends AppCompatActivity {
         }
     }
 
+    /** Displays the current one-based page number and document page count. */
     private void updatePageIndicator() {
         tvPageIndicator.setText(String.format("Trang %d/%d", currentPage, totalPages));
     }
 
+    /**
+     * Saves reading progress to preferences and, when available, SQLite.
+     *
+     * @param paperId identifier used to associate progress with a paper
+     * @param page one-based page number to save
+     */
     private void persistReadProgress(String paperId, int page) {
         // 1. Save to SharedPreferences (Specific requirement of Member 5)
         prefs.edit().putInt(KEY_PAGE_PREFIX + paperId, page).apply();
@@ -369,6 +405,12 @@ public class PdfReaderActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Looks up reading progress in preferences, falling back to SQLite or page one.
+     *
+     * @param paperId identifier of the paper whose progress is requested
+     * @return the saved one-based page number, or one if no progress is available
+     */
     private int getSavedLastPage(String paperId) {
         // First check SharedPreferences
         int savedPage = prefs.getInt(KEY_PAGE_PREFIX + paperId, -1);
@@ -384,6 +426,7 @@ public class PdfReaderActivity extends AppCompatActivity {
         return 1;
     }
 
+    /** Shows the loading overlay with the supplied status and hides the document and error. */
     private void showLoading(String message) {
         layoutLoading.setVisibility(View.VISIBLE);
         tvLoadingStatus.setText(message);
@@ -391,12 +434,14 @@ public class PdfReaderActivity extends AppCompatActivity {
         viewPagerPdf.setVisibility(View.INVISIBLE);
     }
 
+    /** Shows the document pager and hides the loading and error overlays. */
     private void showContent() {
         layoutLoading.setVisibility(View.GONE);
         layoutError.setVisibility(View.GONE);
         viewPagerPdf.setVisibility(View.VISIBLE);
     }
 
+    /** Shows the error overlay with the supplied message and hides the document and loader. */
     private void showError(String message) {
         layoutLoading.setVisibility(View.GONE);
         layoutError.setVisibility(View.VISIBLE);
@@ -404,6 +449,7 @@ public class PdfReaderActivity extends AppCompatActivity {
         viewPagerPdf.setVisibility(View.INVISIBLE);
     }
 
+    /** Cleans up the adapter, closes the renderer and file descriptor, and logs failures. */
     private void closeRenderer() {
         if (activeDownloadCall != null) {
             try {
@@ -413,32 +459,31 @@ public class PdfReaderActivity extends AppCompatActivity {
             activeDownloadCall = null;
         }
 
-        if (pagerAdapter != null) {
-            pagerAdapter.cleanUp();
-            pagerAdapter = null;
-        }
-
-        if (pdfRenderer != null) {
-            synchronized (pdfRenderer) {
-                try {
+        try {
+            if (pagerAdapter != null) {
+                pagerAdapter.cleanUp();
+                pagerAdapter = null;
+            }
+            if (pdfRenderer != null) {
+                synchronized (pdfRenderer) {
                     pdfRenderer.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
                 pdfRenderer = null;
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        if (fileDescriptor != null) {
-            try {
+        try {
+            if (fileDescriptor != null) {
                 fileDescriptor.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+                fileDescriptor = null;
             }
-            fileDescriptor = null;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
+    /** Saves the paper's current reading position when the activity pauses. */
     @Override
     protected void onPause() {
         super.onPause();
@@ -447,6 +492,7 @@ public class PdfReaderActivity extends AppCompatActivity {
         }
     }
 
+    /** Releases PDF rendering resources before the activity is destroyed. */
     @Override
     protected void onDestroy() {
         closeRenderer();
