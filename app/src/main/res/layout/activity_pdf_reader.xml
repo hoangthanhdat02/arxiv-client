@@ -14,10 +14,10 @@
         android:background="?android:attr/colorBackground"
         android:elevation="4dp"
         app:navigationIcon="@android:drawable/ic_menu_revert"
-        app:title="Đọc PDF Bài Báo"
+        app:title="PDF Reader"
         app:titleTextColor="?android:attr/textColorPrimary">
 
-        <!-- Quick Zoom Actions for Emulator Mouse & Touch Presentation -->
+        <!-- Quick Zoom Actions for Touch & Emulator Mouse Controls -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -31,7 +31,7 @@
                 android:layout_width="38dp"
                 android:layout_height="38dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Thu nhỏ"
+                android:contentDescription="Zoom Out"
                 android:src="@drawable/ic_zoom_out" />
 
             <ImageButton
@@ -39,7 +39,7 @@
                 android:layout_width="38dp"
                 android:layout_height="38dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Đặt lại phóng to"
+                android:contentDescription="Reset Zoom"
                 android:src="@drawable/ic_zoom_reset" />
 
             <ImageButton
@@ -47,7 +47,7 @@
                 android:layout_width="38dp"
                 android:layout_height="38dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Phóng to"
+                android:contentDescription="Zoom In"
                 android:src="@drawable/ic_zoom_in" />
         </LinearLayout>
     </com.google.android.material.appbar.MaterialToolbar>
@@ -70,7 +70,7 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Tiêu đề bài báo..."
+            android:text="Paper title..."
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -80,11 +80,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:background="@drawable/badge_bg"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="2dp"
-            android:text="Offline"
-            android:textColor="@color/primary"
+            android:background="@drawable/badge_offline_bg"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="3dp"
+            android:text="Offline Ready"
+            android:textColor="#16A34A"
             android:textSize="11sp"
             android:textStyle="bold"
             android:visibility="gone" />
@@ -96,8 +96,8 @@
             android:layout_marginStart="8dp"
             android:background="@drawable/badge_bg"
             android:paddingHorizontal="8dp"
-            android:paddingVertical="2dp"
-            android:text="Trang 1/1"
+            android:paddingVertical="3dp"
+            android:text="Page 1/1"
             android:textColor="@color/primary"
             android:textSize="12sp"
             android:textStyle="bold" />
@@ -136,7 +136,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Đang tải dữ liệu PDF..."
+                android:text="Loading PDF document..."
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="13sp" />
         </LinearLayout>
@@ -157,21 +157,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Không thể mở tệp PDF.\nVui lòng kiểm tra kết nối mạng hoặc mở bài báo đã tải offline."
+                android:text="Cannot open PDF file.\nPlease check your network connection or open a downloaded paper offline."
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_retry"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Thử lại" />
+                android:textColor="@color/primary"
+                app:strokeColor="@color/primary"
+                app:cornerRadius="8dp"
+                android:text="Retry" />
         </LinearLayout>
     </FrameLayout>
 
-    <!-- Bottom Slider Bar for Quick Page Navigation -->
+    <!-- Bottom Navigation Bar with Quick Page Jump & Offline Download Button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -180,7 +183,7 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="12dp"
-        android:paddingVertical="8dp">
+        android:paddingVertical="10dp">
 
         <!-- Previous Page Button -->
         <ImageButton
@@ -188,7 +191,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Trang trước"
+            android:contentDescription="Previous Page"
             android:src="@drawable/ic_navigate_before" />
 
         <!-- Quick Jump SeekBar -->
@@ -206,19 +209,29 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Trang sau"
+            android:contentDescription="Next Page"
             android:src="@drawable/ic_navigate_next" />
 
-        <!-- Download for Offline Button -->
+        <!-- High-Contrast Material Save Offline Button (Eliminates Purple Glitch) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_download_offline"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="wrap_content"
-            android:layout_height="38dp"
+            android:layout_height="40dp"
             android:layout_marginStart="8dp"
-            android:paddingHorizontal="12dp"
-            android:text="Tải Offline"
-            android:textSize="12sp" />
+            android:backgroundTint="@color/primary"
+            android:textColor="#FFFFFF"
+            android:text="Save Offline"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:icon="@drawable/ic_download"
+            app:iconTint="#FFFFFF"
+            app:iconSize="16dp"
+            app:iconPadding="4dp"
+            app:cornerRadius="20dp"
+            android:paddingHorizontal="14dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
     </LinearLayout>
 
 </LinearLayout>

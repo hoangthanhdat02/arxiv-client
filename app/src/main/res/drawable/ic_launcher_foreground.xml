@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Academic Paper Sheet -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M35,24h26l12,12v48H35V24z" />
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M61,24v12h12L61,24z" />
+    <!-- Text Lines -->
+    <path
+        android:fillColor="#B31B1B"
+        android:pathData="M42,46h24v3H42V46z M42,54h24v3H42V54z M42,62h16v3H42V62z" />
+</vector>

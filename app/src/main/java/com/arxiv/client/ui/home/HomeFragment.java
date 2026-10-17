@@ -122,7 +122,7 @@ public class HomeFragment extends Fragment {
                     List<PaperItem> papers = response.body().getData();
                     paperAdapter.setPapers(papers);
                 } else {
-                    Toast.makeText(getContext(), "Không thể kết nối máy chủ ExpressJS (10.0.2.2:3001)", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Cannot connect to ExpressJS Gateway (10.0.2.2:3001)", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -133,7 +133,7 @@ public class HomeFragment extends Fragment {
                 shimmerView.stopShimmer();
                 shimmerView.setVisibility(View.GONE);
                 recyclerPapers.setVisibility(View.VISIBLE);
-                Toast.makeText(getContext(), "Lỗi mạng: Đang chạy ở chế độ cục bộ hoặc máy chủ tắt", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Network error: Server offline or unreachable", Toast.LENGTH_SHORT).show();
             }
         });
     }

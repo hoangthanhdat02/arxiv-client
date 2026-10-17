@@ -17,7 +17,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="arXiv Khám Phá"
+            android:text="arXiv Explore"
             android:textColor="@color/primary"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -26,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Cập nhật bài báo mới nhất từ máy chủ arXiv"
+            android:text="Latest research papers from arXiv repository"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp" />
     </LinearLayout>

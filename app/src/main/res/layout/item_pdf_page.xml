@@ -8,7 +8,7 @@
         android:id="@+id/zoomable_image_page"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:contentDescription="Trang PDF" />
+        android:contentDescription="PDF Page" />
 
     <ProgressBar
         android:id="@+id/page_loading_progress"

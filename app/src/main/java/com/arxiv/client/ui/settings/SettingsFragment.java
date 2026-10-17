@@ -55,15 +55,29 @@ public class SettingsFragment extends Fragment {
         btnClearCache.setOnClickListener(v -> {
             DownloadService.clearPdfCache(requireContext());
             updateCacheSizeText();
-            Toast.makeText(requireContext(), "Đã dọn sạch bộ nhớ cache PDF trên máy ảo!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "PDF cache cleared successfully!", Toast.LENGTH_SHORT).show();
         });
 
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateCacheSizeText();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) {
+            updateCacheSizeText();
+        }
+    }
+
     private void updateCacheSizeText() {
         long bytes = DownloadService.getCacheSize(requireContext());
         double mb = bytes / (1024.0 * 1024.0);
-        tvCacheSize.setText(String.format("%.2f MB (Tệp PDF ngoại tuyến trong máy ảo)", mb));
+        tvCacheSize.setText(String.format("%.2f MB (Offline PDF files on device)", mb));
     }
 }

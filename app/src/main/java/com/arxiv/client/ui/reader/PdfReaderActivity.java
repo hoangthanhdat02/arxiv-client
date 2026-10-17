@@ -2,6 +2,8 @@ package com.arxiv.client.ui.reader;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.pdf.PdfRenderer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -212,14 +214,19 @@ public class PdfReaderActivity extends AppCompatActivity {
         if (paper == null) return;
 
         if (DownloadService.isPdfDownloaded(this, paper.getId())) {
-            btnDownloadOffline.setText("Đã lưu Offline");
-            btnDownloadOffline.setEnabled(false);
+            File localFile = DownloadService.getLocalPdfFile(this, paper.getId());
+            paper.setLocalPdfPath(localFile.getAbsolutePath());
+            paper.setBookmarked(true);
+            dbHelper.saveBookmark(paper, "Offline");
+            setButtonStateSaved();
             tvOfflineBadge.setVisibility(View.VISIBLE);
             return;
         }
 
+        setButtonStateDefault();
+
         btnDownloadOffline.setOnClickListener(v -> {
-            btnDownloadOffline.setText("Đang tải...");
+            btnDownloadOffline.setText("Downloading...");
             btnDownloadOffline.setEnabled(false);
 
             DownloadService.downloadPdf(this, paper.getPdfUrl(), paper.getId(), new DownloadService.DownloadCallback() {
@@ -229,25 +236,41 @@ public class PdfReaderActivity extends AppCompatActivity {
                     btnDownloadOffline.setText(progressPercent + "%");
                 }
 
-                /** Marks the paper as available offline and records its local file path. */
+                /** Marks the paper as available offline, saves to SQLite bookmarks, and records path. */
                 @Override
                 public void onSuccess(File downloadedFile) {
-                    btnDownloadOffline.setText("Đã lưu Offline");
-                    btnDownloadOffline.setEnabled(false);
+                    paper.setLocalPdfPath(downloadedFile.getAbsolutePath());
+                    paper.setBookmarked(true);
+                    dbHelper.saveBookmark(paper, "Offline");
+                    setButtonStateSaved();
                     tvOfflineBadge.setVisibility(View.VISIBLE);
-                    dbHelper.updateLocalPdfPath(paper.getId(), downloadedFile.getAbsolutePath());
-                    Toast.makeText(PdfReaderActivity.this, "Đã lưu vào bộ nhớ máy ảo! Có thể đọc khi bật Chế độ máy bay.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(PdfReaderActivity.this, "Saved to device! Available in Saved Library.", Toast.LENGTH_LONG).show();
                 }
 
                 /** Re-enables the download action and displays the failure message. */
                 @Override
                 public void onError(String errorMessage) {
-                    btnDownloadOffline.setText("Tải Offline");
-                    btnDownloadOffline.setEnabled(true);
-                    Toast.makeText(PdfReaderActivity.this, "Lỗi tải tệp: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    setButtonStateDefault();
+                    Toast.makeText(PdfReaderActivity.this, "Download error: " + errorMessage, Toast.LENGTH_SHORT).show();
                 }
             });
         });
+    }
+
+    private void setButtonStateSaved() {
+        btnDownloadOffline.setText("Saved Offline");
+        btnDownloadOffline.setEnabled(false);
+        btnDownloadOffline.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#15803D")));
+        btnDownloadOffline.setIconResource(R.drawable.ic_check);
+        btnDownloadOffline.setIconTint(ColorStateList.valueOf(Color.WHITE));
+    }
+
+    private void setButtonStateDefault() {
+        btnDownloadOffline.setText("Save Offline");
+        btnDownloadOffline.setEnabled(true);
+        btnDownloadOffline.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.primary)));
+        btnDownloadOffline.setIconResource(R.drawable.ic_download);
+        btnDownloadOffline.setIconTint(ColorStateList.valueOf(Color.WHITE));
     }
 
     /**
@@ -256,18 +279,20 @@ public class PdfReaderActivity extends AppCompatActivity {
      */
     private void loadPdfDocument() {
         if (paper == null) {
-            showError("Không tìm thấy thông tin bài báo.");
+            showError("Paper information not found.");
             return;
         }
 
-        showLoading("Đang chuẩn bị tài liệu PDF...");
+        showLoading("Preparing PDF document...");
 
         // 1. Check if downloaded permanently in app storage (Offline-first)
         if (DownloadService.isPdfDownloaded(this, paper.getId())) {
             File localFile = DownloadService.getLocalPdfFile(this, paper.getId());
+            paper.setLocalPdfPath(localFile.getAbsolutePath());
+            paper.setBookmarked(true);
+            dbHelper.saveBookmark(paper, "Offline");
             tvOfflineBadge.setVisibility(View.VISIBLE);
-            btnDownloadOffline.setText("Đã lưu Offline");
-            btnDownloadOffline.setEnabled(false);
+            setButtonStateSaved();
             initRendererWithFile(localFile);
             return;
         }
@@ -290,7 +315,7 @@ public class PdfReaderActivity extends AppCompatActivity {
      * @param destinationFile cache path published after the download completes
      */
     private void downloadToCacheAndRender(String url, File destinationFile) {
-        showLoading("Đang tải tệp PDF từ arXiv...");
+        showLoading("Downloading PDF from arXiv...");
 
         new Thread(() -> {
             File temporaryFile = null;
@@ -306,7 +331,7 @@ public class PdfReaderActivity extends AppCompatActivity {
                     if (!response.isSuccessful() || response.body() == null) {
                         mainHandler.post(() -> {
                             if (isFinishing() || isDestroyed()) return;
-                            showError("Không thể tải tài liệu từ máy chủ (Mã lỗi: " + response.code() + ").\nNếu đang bật Chế độ máy bay, vui lòng mở các bài báo đã tải offline.");
+                            showError("Cannot download document from server (Code: " + response.code() + ").\nIf Airplane Mode is ON, please open saved offline papers.");
                         });
                         return;
                     }
@@ -335,7 +360,7 @@ public class PdfReaderActivity extends AppCompatActivity {
                 e.printStackTrace();
                 mainHandler.post(() -> {
                     if (isFinishing() || isDestroyed()) return;
-                    showError("Không thể kết nối máy chủ.\nNếu đang bật Chế độ máy bay, vui lòng mở các bài báo trong tab Đã lưu.");
+                    showError("Cannot connect to server.\nIf Airplane Mode is ON, please open papers from the Saved tab.");
                 });
             } finally {
                 activeDownloadCall = null;
@@ -381,13 +406,13 @@ public class PdfReaderActivity extends AppCompatActivity {
             if (pdfFile != null && pdfFile.exists() && (paper == null || !DownloadService.isPdfDownloaded(this, paper.getId()))) {
                 pdfFile.delete();
             }
-            showError("Lỗi khởi tạo trình đọc PDF native: " + e.getMessage());
+            showError("Native PDF renderer error: " + e.getMessage());
         }
     }
 
     /** Displays the current one-based page number and document page count. */
     private void updatePageIndicator() {
-        tvPageIndicator.setText(String.format("Trang %d/%d", currentPage, totalPages));
+        tvPageIndicator.setText(String.format("Page %d/%d", currentPage, totalPages));
     }
 
     /**

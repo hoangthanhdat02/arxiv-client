@@ -14,5 +14,8 @@
         <item name="android:colorBackground">@color/background_dark</item>
         <item name="colorSurface">@color/surface_dark</item>
         <item name="colorOnSurface">@color/text_primary_dark</item>
+        <!-- Material 3 Container Compatibility -->
+        <item name="colorSecondaryContainer">#334155</item>
+        <item name="colorOnSecondaryContainer">#F8FAFC</item>
     </style>
 </resources>
