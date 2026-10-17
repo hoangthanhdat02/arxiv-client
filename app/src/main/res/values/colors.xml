@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#B31B1B</color> <!-- arXiv Academic Crimson -->
+    <color name="primary_variant">#8A1212</color>
+    <color name="secondary">#0284C7</color>
+    <color name="secondary_variant">#0369A1</color>
+    
+    <color name="background_light">#F8FAFC</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="text_primary_light">#0F172A</color>
+    <color name="text_secondary_light">#64748B</color>
+    <color name="border_light">#E2E8F0</color>
+
+    <color name="background_dark">#0F172A</color>
+    <color name="surface_dark">#1E293B</color>
+    <color name="text_primary_dark">#F8FAFC</color>
+    <color name="text_secondary_dark">#94A3B8</color>
+    <color name="border_dark">#334155</color>
+
+    <color name="badge_ai">#DC2626</color>
+    <color name="badge_lg">#2563EB</color>
+    <color name="badge_bg">#FEE2E2</color>
+    <color name="shimmer_color">#E0E0E0</color>
+</resources>

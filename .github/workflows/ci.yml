@@ -1,0 +1,31 @@
+name: Android Client CI Check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  check-project:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Verify Android Java Project Structure
+      run: |
+        echo "Verifying Android Gradle & Java Manifest..."
+        test -f settings.gradle || exit 1
+        test -f build.gradle || exit 1
+        test -f app/build.gradle || exit 1
+        test -f app/src/main/AndroidManifest.xml || exit 1
+        test -f app/src/main/java/com/arxiv/client/MainActivity.java || exit 1
+        echo "Android Java Project structure verified successfully!"
