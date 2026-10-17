@@ -3,9 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="?android:attr/colorBackground">
 
-    <!-- Top Navigation Toolbar -->
+    <!-- Top Navigation Toolbar with Zoom Actions -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -14,13 +15,49 @@
         android:elevation="4dp"
         app:navigationIcon="@android:drawable/ic_menu_revert"
         app:title="Đọc PDF Bài Báo"
-        app:titleTextColor="?android:attr/textColorPrimary" />
+        app:titleTextColor="?android:attr/textColorPrimary">
 
-    <!-- Paper Title & Info Bar -->
+        <!-- Quick Zoom Actions for Emulator Mouse & Touch Presentation -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingEnd="8dp">
+
+            <ImageButton
+                android:id="@+id/btn_zoom_out"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Thu nhỏ"
+                android:src="@drawable/ic_zoom_out" />
+
+            <ImageButton
+                android:id="@+id/btn_zoom_reset"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Đặt lại phóng to"
+                android:src="@drawable/ic_zoom_reset" />
+
+            <ImageButton
+                android:id="@+id/btn_zoom_in"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Phóng to"
+                android:src="@drawable/ic_zoom_in" />
+        </LinearLayout>
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <!-- Paper Title & Page Info Sub-bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface_light"
+        android:elevation="2dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
@@ -35,8 +72,22 @@
             android:maxLines="1"
             android:text="Tiêu đề bài báo..."
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_offline_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/badge_bg"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:text="Offline"
+            android:textColor="@color/primary"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tv_page_indicator"
@@ -46,31 +97,81 @@
             android:background="@drawable/badge_bg"
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
-            android:text="Trang 1/15"
+            android:text="Trang 1/1"
             android:textColor="@color/primary"
             android:textSize="12sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- PDF Viewer Container / WebView Native Renderer -->
+    <!-- Main ViewPager2 for Native PDF Rendering -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <WebView
-            android:id="@+id/web_pdf_viewer"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager_pdf"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:orientation="horizontal" />
 
-        <ProgressBar
-            android:id="@+id/pdf_progress_bar"
+        <!-- Loading State Overlay -->
+        <LinearLayout
+            android:id="@+id/layout_loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/pdf_progress_bar"
+                android:layout_width="48dp"
+                android:layout_height="48dp" />
+
+            <TextView
+                android:id="@+id/tv_loading_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Đang tải dữ liệu PDF..."
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- Error State Overlay (Offline or Network Error) -->
+        <LinearLayout
+            android:id="@+id/layout_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_error_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Không thể mở tệp PDF.\nVui lòng kiểm tra kết nối mạng hoặc mở bài báo đã tải offline."
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_retry"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Thử lại" />
+        </LinearLayout>
     </FrameLayout>
 
-    <!-- Bottom Slider Bar for Quick Page Jumping -->
+    <!-- Bottom Slider Bar for Quick Page Navigation -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -78,31 +179,45 @@
         android:elevation="8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="10dp">
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nhảy trang:"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="13sp" />
+        <!-- Previous Page Button -->
+        <ImageButton
+            android:id="@+id/btn_prev_page"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Trang trước"
+            android:src="@drawable/ic_navigate_before" />
 
+        <!-- Quick Jump SeekBar -->
         <SeekBar
             android:id="@+id/seek_bar_pages"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:max="15"
+            android:max="1"
             android:progress="1" />
 
+        <!-- Next Page Button -->
+        <ImageButton
+            android:id="@+id/btn_next_page"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Trang sau"
+            android:src="@drawable/ic_navigate_next" />
+
+        <!-- Download for Offline Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_download_offline"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:text="@string/btn_download"
-            android:textColor="@color/primary"
+            android:layout_height="38dp"
+            android:layout_marginStart="8dp"
+            android:paddingHorizontal="12dp"
+            android:text="Tải Offline"
             android:textSize="12sp" />
     </LinearLayout>
 
