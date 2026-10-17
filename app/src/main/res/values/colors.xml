@@ -1,24 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#B31B1B</color> <!-- arXiv Academic Crimson -->
-    <color name="primary_variant">#8A1212</color>
-    <color name="secondary">#0284C7</color>
-    <color name="secondary_variant">#0369A1</color>
-    
-    <color name="background_light">#F8FAFC</color>
-    <color name="surface_light">#FFFFFF</color>
-    <color name="text_primary_light">#0F172A</color>
-    <color name="text_secondary_light">#64748B</color>
-    <color name="border_light">#E2E8F0</color>
+    <!-- Accent Colors (from image guidelines: Xanh Navy, Xanh Gốm, Đỏ Gạch) -->
+    <color name="primary">#1E3A8A</color> <!-- Deep Academic Navy -->
+    <color name="primary_variant">#172554</color>
+    <color name="primary_light">#3B82F6</color>
+    <color name="secondary">#0D9488</color> <!-- Xanh Gốm / Ceramic Teal -->
+    <color name="secondary_variant">#0F766E</color>
+    <color name="accent_brick">#B91C1C</color> <!-- Đỏ Gạch / Brick Red -->
 
-    <color name="background_dark">#0F172A</color>
-    <color name="surface_dark">#1E293B</color>
-    <color name="text_primary_dark">#F8FAFC</color>
-    <color name="text_secondary_dark">#94A3B8</color>
-    <color name="border_dark">#334155</color>
+    <!-- Light Mode (from image guidelines: #F4F1EA / #FAFAFA, text #1F2937) -->
+    <color name="background_light">#F4F1EA</color> <!-- Trắng ngà / warm paper ivory -->
+    <color name="surface_light">#FFFFFF</color> <!-- Pure white paper surface -->
+    <color name="surface_variant_light">#F5F5F0</color> <!-- Kem nhạt -->
+    <color name="text_primary_light">#1F2937</color> <!-- Xám rất đậm -->
+    <color name="text_secondary_light">#4B5563</color> <!-- Xám slate đọc êm mắt -->
+    <color name="border_light">#E5E2DA</color> <!-- Đường viền thanh lịch -->
 
-    <color name="badge_ai">#DC2626</color>
-    <color name="badge_lg">#2563EB</color>
+    <!-- Dark Mode (from image guidelines: #121212 / #1E1E1E, text #E2E8F0) -->
+    <color name="background_dark">#121212</color> <!-- Xám chì / không dùng #000000 tuyệt đối -->
+    <color name="surface_dark">#1E1E1E</color> <!-- Xám chì cho card surface -->
+    <color name="surface_variant_dark">#1A202C</color> <!-- Xám than đậm -->
+    <color name="text_primary_dark">#E2E8F0</color> <!-- Trắng ngà sáng -->
+    <color name="text_secondary_dark">#94A3B8</color> <!-- Xám nhạt -->
+    <color name="border_dark">#2D3748</color>
+    <color name="primary_dark">#60A5FA</color> <!-- Soft Sky Navy for dark theme -->
+
+    <!-- Sepia / Warm Mode (from image guidelines: #F4ECD8, text #3D2314 / #5F4B32) -->
+    <color name="sepia_background">#F4ECD8</color> <!-- Vàng kem / Giấy cũ -->
+    <color name="sepia_surface">#FBF0D9</color>
+    <color name="sepia_text_primary">#3D2314</color> <!-- Cà phê đậm -->
+    <color name="sepia_text_secondary">#5F4B32</color> <!-- Nâu sẫm -->
+
+    <!-- Category Badges & Indicators -->
+    <color name="badge_ai">#B91C1C</color> <!-- Đỏ gạch cs.AI -->
+    <color name="badge_lg">#0D9488</color> <!-- Xanh gốm cs.LG -->
     <color name="badge_bg">#FEE2E2</color>
-    <color name="shimmer_color">#E0E0E0</color>
+    <color name="badge_bg_teal">#CCFBF1</color>
+    <color name="badge_bg_navy">#DBEAFE</color>
+    <color name="badge_offline">#0D9488</color>
+    <color name="shimmer_color">#E5E2DA</color>
+
+    <!-- Dynamic Surface & Card Tokens (Light Mode defaults) -->
+    <color name="card_bg">#FFFFFF</color>
+    <color name="card_border">#E5E2DA</color>
+    <color name="app_bg">#F4F1EA</color>
+    <color name="top_bar_bg">#F4F1EA</color>
+    <color name="button_primary_bg">#1E3A8A</color>
+    <color name="button_primary_text">#FFFFFF</color>
+    <color name="bibtex_border">#1E3A8A</color>
+    <color name="bibtex_text">#1E3A8A</color>
+    <color name="badge_offline_text">#0D9488</color>
 </resources>

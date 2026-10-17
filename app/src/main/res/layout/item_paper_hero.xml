@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="@color/card_bg"
+    app:strokeColor="@color/card_border"
+    app:strokeWidth="1.5dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- BBC-style Top Accent Color Strip -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@drawable/hero_accent_bar" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <!-- Row 1: Lead Section Tag + Date -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- BBC Lead Research Indicator Pill -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/badge_brand_box"
+                    android:paddingHorizontal="7dp"
+                    android:paddingVertical="3dp"
+                    android:text="TOP RESEARCH"
+                    android:textColor="#FFFFFF"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.06" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tv_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="15 Oct 2024"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Row 2: Category & Offline Status Badges -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_category"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/badge_bg"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:text="cs.AI"
+                    android:textColor="@color/badge_ai"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <!-- Offline Ready Indicator Badge -->
+                <TextView
+                    android:id="@+id/tv_card_offline_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/badge_offline_bg"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:text="Offline Ready"
+                    android:textColor="@color/badge_offline_text"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Hero Headline in BBC Merriweather Serif Style -->
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:ellipsize="end"
+                android:fontFamily="@font/inter"
+                android:lineSpacingExtra="4dp"
+                android:maxLines="3"
+                android:text="Attention Is All You Need"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="19sp"
+                android:textStyle="bold" />
+
+            <!-- Authors Bylines in Editorial Style -->
+            <TextView
+                android:id="@+id/tv_authors"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Ashish Vaswani, Noam Shazeer, Niki Parmar"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="13sp"
+                android:textStyle="italic" />
+
+            <!-- Abstract Snippet with Editorial Line Height -->
+            <TextView
+                android:id="@+id/tv_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:lineSpacingExtra="3dp"
+                android:maxLines="4"
+                android:text="The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration..."
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="13sp" />
+
+            <!-- BBC Editorial Action Bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Read PDF Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_read_pdf"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:backgroundTint="@color/button_primary_bg"
+                    android:textColor="@color/button_primary_text"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:text="@string/btn_read_pdf"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="8dp" />
+
+                <!-- BibTeX Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_bibtex"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:text="BibTeX"
+                    android:textColor="@color/bibtex_text"
+                    app:strokeColor="@color/bibtex_border"
+                    android:textSize="12sp"
+                    app:cornerRadius="8dp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <!-- Bookmark Button -->
+                <ImageButton
+                    android:id="@+id/btn_bookmark"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="Bookmark"
+                    android:src="@drawable/ic_bookmark_border" />
+
+                <!-- Share Button -->
+                <ImageButton
+                    android:id="@+id/btn_share"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="Share"
+                    android:src="@android:drawable/ic_menu_share" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

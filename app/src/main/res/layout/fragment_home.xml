@@ -5,50 +5,104 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Top App Bar / Title -->
+    <!-- BBC-style Top Editorial Masthead -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="8dp">
+        android:paddingTop="14dp"
+        android:paddingBottom="6dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- BBC-style 3 Square Blocks: [ar][X][iv] -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:background="@drawable/bbc_box_navy"
+                    android:gravity="center"
+                    android:text="ar"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginStart="2dp"
+                    android:background="@drawable/bbc_box_red"
+                    android:gravity="center"
+                    android:text="X"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginStart="2dp"
+                    android:background="@drawable/bbc_box_navy"
+                    android:gravity="center"
+                    android:text="iv"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/inter"
+                android:text="RESEARCH"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.04" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="arXiv Explore"
-            android:textColor="@color/primary"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Latest research papers from arXiv repository"
+            android:layout_marginTop="3dp"
+            android:text="Open-access peer research repository • Cornell University"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp" />
+            android:textSize="11.5sp" />
     </LinearLayout>
 
-    <!-- Category Selector Tabs (cs.AI vs cs.LG) -->
+    <!-- Category Selector Tabs: 2 Focus Areas (cs.AI & cs.LG) -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_category"
         android:layout_width="match_parent"
-        android:layout_height="42dp"
-        app:tabIndicatorColor="@color/primary"
-        app:tabSelectedTextColor="@color/primary"
+        android:layout_height="44dp"
+        android:background="?android:attr/colorBackground"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="?attr/colorPrimary"
+        app:tabIndicatorHeight="3dp"
+        app:tabSelectedTextColor="?attr/colorPrimary"
         app:tabTextColor="?android:attr/textColorSecondary">
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/feed_title_ai" />
+            android:text="Artificial Intelligence (cs.AI)" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/feed_title_lg" />
+            android:text="Machine Learning (cs.LG)" />
     </com.google.android.material.tabs.TabLayout>
 
     <!-- Swipe Refresh Layout & RecyclerView -->

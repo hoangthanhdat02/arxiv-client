@@ -82,8 +82,17 @@ public class PaperItem implements Serializable {
     public List<String> getCategories() { return categories; }
     public void setCategories(List<String> categories) { this.categories = categories; }
 
-    public String getPrimaryCategory() { return primaryCategory != null ? primaryCategory : "cs.AI"; }
-    public void setPrimaryCategory(String primaryCategory) { this.primaryCategory = primaryCategory; }
+    public String getPrimaryCategory() {
+        if ("cs.LG".equalsIgnoreCase(primaryCategory)) {
+            return "cs.LG";
+        }
+        if (categories != null) {
+            for (String cat : categories) {
+                if ("cs.LG".equalsIgnoreCase(cat)) return "cs.LG";
+            }
+        }
+        return "cs.AI";
+    }
 
     public String getPdfUrl() { return pdfUrl != null ? pdfUrl : ""; }
     public void setPdfUrl(String pdfUrl) { this.pdfUrl = pdfUrl; }

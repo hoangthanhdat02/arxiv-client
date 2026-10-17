@@ -56,7 +56,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface_light"
+        android:background="@color/card_bg"
         android:elevation="2dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -69,6 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ellipsize="end"
+            android:fontFamily="@font/inter"
             android:maxLines="1"
             android:text="Paper title..."
             android:textColor="?android:attr/textColorPrimary"
@@ -84,7 +85,7 @@
             android:paddingHorizontal="8dp"
             android:paddingVertical="3dp"
             android:text="Offline Ready"
-            android:textColor="#16A34A"
+            android:textColor="@color/badge_offline_text"
             android:textSize="11sp"
             android:textStyle="bold"
             android:visibility="gone" />
@@ -98,7 +99,7 @@
             android:paddingHorizontal="8dp"
             android:paddingVertical="3dp"
             android:text="Page 1/1"
-            android:textColor="@color/primary"
+            android:textColor="?attr/colorPrimary"
             android:textSize="12sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -212,20 +213,20 @@
             android:contentDescription="Next Page"
             android:src="@drawable/ic_navigate_next" />
 
-        <!-- High-Contrast Material Save Offline Button (Eliminates Purple Glitch) -->
+        <!-- High-Contrast Material Save Offline Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_download_offline"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_marginStart="8dp"
-            android:backgroundTint="@color/primary"
-            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/button_primary_bg"
+            android:textColor="@color/button_primary_text"
             android:text="Save Offline"
             android:textSize="12sp"
             android:textStyle="bold"
             app:icon="@drawable/ic_download"
-            app:iconTint="#FFFFFF"
+            app:iconTint="@color/button_primary_text"
             app:iconSize="16dp"
             app:iconPadding="4dp"
             app:cornerRadius="20dp"

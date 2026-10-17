@@ -1,20 +1,54 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="12dp"
-    android:layout_marginVertical="6dp"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="2dp"
-    app:strokeColor="@color/border_light"
-    app:strokeWidth="1dp">
+    android:orientation="vertical">
+
+    <!-- BBC Editorial Section Divider (displayed for position == 1) -->
+    <LinearLayout
+        android:id="@+id/layout_section_divider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="6dp"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="14dp"
+            android:background="@drawable/badge_brand_box" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.08"
+            android:text="LATEST RESEARCH"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginVertical="5dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="1.5dp"
+        app:cardBackgroundColor="@color/card_bg"
+        app:strokeColor="@color/card_border"
+        app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="15dp">
 
         <!-- Header: Category Badge + Offline Ready Badge + Date -->
         <LinearLayout
@@ -28,12 +62,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/badge_bg"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="2.5dp"
                 android:text="cs.AI"
                 android:textColor="@color/badge_ai"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.04" />
 
             <!-- Offline Ready Indicator Badge -->
             <TextView
@@ -42,11 +77,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/badge_offline_bg"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="2.5dp"
                 android:text="Offline Ready"
-                android:textColor="#16A34A"
-                android:textSize="11sp"
+                android:textColor="@color/badge_offline_text"
+                android:textSize="10.5sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
 
@@ -64,20 +99,22 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- Paper Title -->
+        <!-- Paper Title with BBC Merriweather Serif -->
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:ellipsize="end"
+            android:fontFamily="@font/inter"
+            android:lineSpacingExtra="2.5dp"
             android:maxLines="3"
             android:text="Attention Is All You Need"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <!-- Authors -->
+        <!-- Authors in Italic -->
         <TextView
             android:id="@+id/tv_authors"
             android:layout_width="match_parent"
@@ -87,7 +124,8 @@
             android:maxLines="2"
             android:text="Ashish Vaswani, Noam Shazeer, Niki Parmar"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="13sp" />
+            android:textSize="12.5sp"
+            android:textStyle="italic" />
 
         <!-- Abstract Snippet -->
         <TextView
@@ -96,6 +134,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:ellipsize="end"
+            android:lineSpacingExtra="2dp"
             android:maxLines="3"
             android:text="The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration..."
             android:textColor="?android:attr/textColorSecondary"
@@ -114,12 +153,13 @@
                 android:id="@+id/btn_read_pdf"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="wrap_content"
-                android:layout_height="38dp"
-                android:backgroundTint="@color/primary"
+                android:layout_height="36dp"
+                android:backgroundTint="@color/button_primary_bg"
+                android:textColor="@color/button_primary_text"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:text="@string/btn_read_pdf"
-                android:textSize="12sp"
+                android:textSize="11.5sp"
                 android:textStyle="bold"
                 app:cornerRadius="8dp" />
 
@@ -128,14 +168,14 @@
                 android:id="@+id/btn_bibtex"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
-                android:layout_height="38dp"
+                android:layout_height="36dp"
                 android:layout_marginStart="8dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:text="BibTeX"
-                android:textColor="@color/primary"
-                app:strokeColor="@color/border_light"
-                android:textSize="12sp"
+                android:textColor="@color/bibtex_text"
+                app:strokeColor="@color/bibtex_border"
+                android:textSize="11.5sp"
                 app:cornerRadius="8dp" />
 
             <View
@@ -146,8 +186,8 @@
             <!-- Bookmark Button -->
             <ImageButton
                 android:id="@+id/btn_bookmark"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="Bookmark"
                 android:src="@drawable/ic_bookmark_border" />
@@ -155,8 +195,8 @@
             <!-- Share Button -->
             <ImageButton
                 android:id="@+id/btn_share"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="Share"
                 android:src="@android:drawable/ic_menu_share" />
@@ -166,3 +206,4 @@
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
+</LinearLayout>

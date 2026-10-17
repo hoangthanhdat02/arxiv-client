@@ -78,11 +78,18 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private static final String[] CATEGORIES = {"cs.AI", "cs.LG"};
+
     private void setupTabs() {
         tabCategory.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                currentCategory = (tab.getPosition() == 0) ? "cs.AI" : "cs.LG";
+                int pos = tab.getPosition();
+                if (pos >= 0 && pos < CATEGORIES.length) {
+                    currentCategory = CATEGORIES[pos];
+                } else {
+                    currentCategory = "cs.AI";
+                }
                 currentPage = 0;
                 loadPapers(true);
             }
@@ -99,11 +106,20 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        tabCategory = null;
+        swipeRefresh = null;
+        recyclerPapers = null;
+        shimmerView = null;
+    }
+
     private void loadPapers(boolean showShimmer) {
         if (isLoading) return;
         isLoading = true;
 
-        if (showShimmer) {
+        if (showShimmer && shimmerView != null && recyclerPapers != null) {
             shimmerView.setVisibility(View.VISIBLE);
             shimmerView.startShimmer();
             recyclerPapers.setVisibility(View.GONE);
@@ -113,27 +129,41 @@ public class HomeFragment extends Fragment {
             @Override
             public void onResponse(Call<PaperResponse> call, Response<PaperResponse> response) {
                 isLoading = false;
-                swipeRefresh.setRefreshing(false);
-                shimmerView.stopShimmer();
-                shimmerView.setVisibility(View.GONE);
-                recyclerPapers.setVisibility(View.VISIBLE);
+                if (!isAdded() || getContext() == null || getView() == null) return;
+
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (shimmerView != null) {
+                    shimmerView.stopShimmer();
+                    shimmerView.setVisibility(View.GONE);
+                }
+                if (recyclerPapers != null) recyclerPapers.setVisibility(View.VISIBLE);
 
                 if (response.isSuccessful() && response.body() != null) {
                     List<PaperItem> papers = response.body().getData();
-                    paperAdapter.setPapers(papers);
+                    if (paperAdapter != null) {
+                        paperAdapter.setPapers(papers);
+                    }
                 } else {
-                    Toast.makeText(getContext(), "Cannot connect to ExpressJS Gateway (10.0.2.2:3001)", Toast.LENGTH_SHORT).show();
+                    if (getContext() != null) {
+                        Toast.makeText(getContext(), "Cannot connect to ExpressJS Gateway (10.0.2.2:3001)", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<PaperResponse> call, Throwable t) {
                 isLoading = false;
-                swipeRefresh.setRefreshing(false);
-                shimmerView.stopShimmer();
-                shimmerView.setVisibility(View.GONE);
-                recyclerPapers.setVisibility(View.VISIBLE);
-                Toast.makeText(getContext(), "Network error: Server offline or unreachable", Toast.LENGTH_SHORT).show();
+                if (!isAdded() || getContext() == null || getView() == null) return;
+
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (shimmerView != null) {
+                    shimmerView.stopShimmer();
+                    shimmerView.setVisibility(View.GONE);
+                }
+                if (recyclerPapers != null) recyclerPapers.setVisibility(View.VISIBLE);
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Network error: Server offline or unreachable", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -146,9 +176,11 @@ public class HomeFragment extends Fragment {
             @Override
             public void onResponse(Call<PaperResponse> call, Response<PaperResponse> response) {
                 isLoading = false;
+                if (!isAdded() || getContext() == null || getView() == null) return;
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<PaperItem> morePapers = response.body().getData();
-                    if (morePapers != null && !morePapers.isEmpty()) {
+                    if (morePapers != null && !morePapers.isEmpty() && paperAdapter != null) {
                         paperAdapter.addPapers(morePapers);
                     }
                 }

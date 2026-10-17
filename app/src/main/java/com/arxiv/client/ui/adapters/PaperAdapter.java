@@ -63,10 +63,25 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
         }
     }
 
+    private boolean heroEnabled = true;
+
+    public void setHeroEnabled(boolean heroEnabled) {
+        this.heroEnabled = heroEnabled;
+    }
+
+    private static final int VIEW_TYPE_HERO = 0;
+    private static final int VIEW_TYPE_STANDARD = 1;
+
+    @Override
+    public int getItemViewType(int position) {
+        return (heroEnabled && position == 0) ? VIEW_TYPE_HERO : VIEW_TYPE_STANDARD;
+    }
+
     @NonNull
     @Override
     public PaperViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_paper_card, parent, false);
+        int layoutId = (viewType == VIEW_TYPE_HERO) ? R.layout.item_paper_hero : R.layout.item_paper_card;
+        View view = LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false);
         return new PaperViewHolder(view);
     }
 
@@ -74,11 +89,27 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
     public void onBindViewHolder(@NonNull PaperViewHolder holder, int position) {
         PaperItem paper = papers.get(position);
 
-        holder.tvCategory.setText(paper.getPrimaryCategory());
+        String category = paper.getPrimaryCategory();
+        if (!"cs.LG".equalsIgnoreCase(category)) {
+            category = "cs.AI";
+        }
+        holder.tvCategory.setText(category);
+        if ("cs.LG".equalsIgnoreCase(category)) {
+            holder.tvCategory.setTextColor(context.getColor(R.color.badge_lg));
+            holder.tvCategory.setBackgroundResource(R.drawable.badge_offline_bg);
+        } else {
+            holder.tvCategory.setTextColor(context.getColor(R.color.badge_ai));
+            holder.tvCategory.setBackgroundResource(R.drawable.badge_bg);
+        }
         holder.tvDate.setText(paper.getFormattedDate());
         holder.tvTitle.setText(paper.getTitle());
         holder.tvAuthors.setText(paper.getAuthorsString());
         holder.tvSummary.setText(paper.getSummary());
+
+        // BBC Section Divider for the first item after the Hero card
+        if (holder.layoutSectionDivider != null) {
+            holder.layoutSectionDivider.setVisibility((heroEnabled && position == 1) ? View.VISIBLE : View.GONE);
+        }
 
         // Offline Ready badge indicator
         boolean isDownloaded = DownloadService.isPdfDownloaded(context, paper.getId());
@@ -169,9 +200,11 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
         TextView tvCategory, tvCardOfflineBadge, tvDate, tvTitle, tvAuthors, tvSummary;
         MaterialButton btnReadPdf, btnBibtex;
         ImageButton btnBookmark, btnShare;
+        View layoutSectionDivider;
 
         public PaperViewHolder(@NonNull View itemView) {
             super(itemView);
+            layoutSectionDivider = itemView.findViewById(R.id.layout_section_divider);
             tvCategory = itemView.findViewById(R.id.tv_category);
             tvCardOfflineBadge = itemView.findViewById(R.id.tv_card_offline_badge);
             tvDate = itemView.findViewById(R.id.tv_date);

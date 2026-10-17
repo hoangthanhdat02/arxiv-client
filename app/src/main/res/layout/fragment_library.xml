@@ -5,31 +5,82 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Header -->
+    <!-- BBC-style Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="8dp">
+        android:paddingTop="14dp"
+        android:paddingBottom="6dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Saved Library"
-            android:textColor="@color/primary"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- BBC-style 3 Square Blocks: [ar][X][iv] -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:background="@drawable/bbc_box_navy"
+                    android:gravity="center"
+                    android:text="ar"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginStart="2dp"
+                    android:background="@drawable/bbc_box_red"
+                    android:gravity="center"
+                    android:text="X"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginStart="2dp"
+                    android:background="@drawable/bbc_box_navy"
+                    android:gravity="center"
+                    android:text="iv"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/inter"
+                android:text="SAVED"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.04" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tv_library_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="3dp"
             android:text="Offline SQLite storage - Read anytime in Airplane Mode"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp" />
+            android:textSize="11.5sp" />
     </LinearLayout>
 
     <FrameLayout
@@ -78,8 +129,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:text="Explore Papers"
-                android:textColor="@color/primary"
-                app:strokeColor="@color/primary"
+                android:textColor="?attr/colorPrimary"
+                app:strokeColor="?attr/colorPrimary"
                 app:cornerRadius="20dp" />
         </LinearLayout>
 

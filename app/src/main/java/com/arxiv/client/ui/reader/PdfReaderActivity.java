@@ -260,7 +260,8 @@ public class PdfReaderActivity extends AppCompatActivity {
     private void setButtonStateSaved() {
         btnDownloadOffline.setText("Saved Offline");
         btnDownloadOffline.setEnabled(false);
-        btnDownloadOffline.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#15803D")));
+        btnDownloadOffline.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D9488")));
+        btnDownloadOffline.setTextColor(Color.WHITE);
         btnDownloadOffline.setIconResource(R.drawable.ic_check);
         btnDownloadOffline.setIconTint(ColorStateList.valueOf(Color.WHITE));
     }
@@ -268,9 +269,10 @@ public class PdfReaderActivity extends AppCompatActivity {
     private void setButtonStateDefault() {
         btnDownloadOffline.setText("Save Offline");
         btnDownloadOffline.setEnabled(true);
-        btnDownloadOffline.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.primary)));
+        btnDownloadOffline.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.button_primary_bg)));
+        btnDownloadOffline.setTextColor(getColor(R.color.button_primary_text));
         btnDownloadOffline.setIconResource(R.drawable.ic_download);
-        btnDownloadOffline.setIconTint(ColorStateList.valueOf(Color.WHITE));
+        btnDownloadOffline.setIconTint(ColorStateList.valueOf(getColor(R.color.button_primary_text)));
     }
 
     /**

@@ -1,23 +1,33 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme (Light) -->
+    <!-- Base application theme (Light - Academic Paper Palette) -->
     <style name="Theme.ArxivClient" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color -->
+        <!-- Global Typography: Inter Font -->
+        <item name="fontFamily">@font/inter</item>
+        <item name="android:fontFamily">@font/inter</item>
+
+        <!-- Primary brand color (Deep Academic Navy #1E3A8A) -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_variant</item>
         <item name="colorOnPrimary">#FFFFFF</item>
-        <!-- Secondary brand color -->
+
+        <!-- Secondary brand color (Xanh Gốm / Ceramic Teal #0D9488) -->
         <item name="colorSecondary">@color/secondary</item>
         <item name="colorSecondaryVariant">@color/secondary_variant</item>
         <item name="colorOnSecondary">#FFFFFF</item>
+
         <!-- Status bar color -->
-        <item name="android:statusBarColor">@color/surface_light</item>
+        <item name="android:statusBarColor">@color/background_light</item>
         <item name="android:windowLightStatusBar">true</item>
-        <!-- Background and Surface -->
+
+        <!-- Background and Surface (#F4F1EA Trắng ngà, #1F2937 Xám rất đậm) -->
         <item name="android:colorBackground">@color/background_light</item>
         <item name="colorSurface">@color/surface_light</item>
         <item name="colorOnSurface">@color/text_primary_light</item>
-        <!-- Material 3 Container Compatibility -->
-        <item name="colorSecondaryContainer">#FEE2E2</item>
+        <item name="android:textColorPrimary">@color/text_primary_light</item>
+        <item name="android:textColorSecondary">@color/text_secondary_light</item>
+
+        <!-- Container styling -->
+        <item name="colorSecondaryContainer">@color/badge_bg_navy</item>
         <item name="colorOnSecondaryContainer">@color/primary</item>
     </style>
 </resources>

@@ -43,6 +43,7 @@ public class LibraryFragment extends Fragment {
 
         dbHelper = ArxivDbHelper.getInstance(requireContext());
         paperAdapter = new PaperAdapter(requireContext());
+        paperAdapter.setHeroEnabled(false);
 
         recyclerLibrary.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerLibrary.setAdapter(paperAdapter);
@@ -77,23 +78,40 @@ public class LibraryFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        loadSavedBookmarks();
+        if (isAdded() && getContext() != null) {
+            loadSavedBookmarks();
+        }
     }
 
     /**
-     * CRITICAL FIX: When switching between tabs using FragmentTransaction hide/show,
+     * When switching between tabs using FragmentTransaction hide/show,
      * onResume is NOT invoked. onHiddenChanged is invoked instead.
      */
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (!hidden) {
+        if (!hidden && isAdded() && getContext() != null) {
             loadSavedBookmarks();
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        recyclerLibrary = null;
+        layoutEmpty = null;
+        tvLibrarySubtitle = null;
+        swipeRefreshLibrary = null;
+        btnBrowseExplore = null;
+    }
+
     private void loadSavedBookmarks() {
-        if (dbHelper == null) return;
+        if (!isAdded() || getContext() == null || recyclerLibrary == null || layoutEmpty == null) {
+            return;
+        }
+        if (dbHelper == null) {
+            dbHelper = ArxivDbHelper.getInstance(getContext());
+        }
         List<PaperItem> savedPapers = dbHelper.getAllBookmarks();
         if (savedPapers == null || savedPapers.isEmpty()) {
             layoutEmpty.setVisibility(View.VISIBLE);
@@ -104,7 +122,9 @@ public class LibraryFragment extends Fragment {
         } else {
             layoutEmpty.setVisibility(View.GONE);
             recyclerLibrary.setVisibility(View.VISIBLE);
-            paperAdapter.setPapers(savedPapers);
+            if (paperAdapter != null) {
+                paperAdapter.setPapers(savedPapers);
+            }
             if (tvLibrarySubtitle != null) {
                 tvLibrarySubtitle.setText(savedPapers.size() + (savedPapers.size() == 1 ? " paper saved for offline reading" : " papers saved for offline reading"));
             }

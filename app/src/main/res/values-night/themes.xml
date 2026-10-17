@@ -1,21 +1,33 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme (Dark) -->
+    <!-- Base application theme (Dark - Editorial Charcoal Palette) -->
     <style name="Theme.ArxivClient" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryVariant">@color/primary_variant</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
+        <!-- Global Typography: Inter Font -->
+        <item name="fontFamily">@font/inter</item>
+        <item name="android:fontFamily">@font/inter</item>
+
+        <!-- Primary brand color (Sky Navy #60A5FA for dark mode contrast) -->
+        <item name="colorPrimary">@color/primary_dark</item>
+        <item name="colorPrimaryVariant">@color/primary</item>
+        <item name="colorOnPrimary">#121212</item>
+
+        <!-- Secondary brand color (Xanh Gốm / Ceramic Teal #0D9488) -->
         <item name="colorSecondary">@color/secondary</item>
         <item name="colorSecondaryVariant">@color/secondary_variant</item>
         <item name="colorOnSecondary">#FFFFFF</item>
+
         <!-- Status bar color -->
-        <item name="android:statusBarColor">@color/surface_dark</item>
+        <item name="android:statusBarColor">@color/background_dark</item>
         <item name="android:windowLightStatusBar">false</item>
-        <!-- Background and Surface -->
+
+        <!-- Background and Surface (#121212 Xám chì, #E2E8F0 Trắng ngà) -->
         <item name="android:colorBackground">@color/background_dark</item>
         <item name="colorSurface">@color/surface_dark</item>
         <item name="colorOnSurface">@color/text_primary_dark</item>
-        <!-- Material 3 Container Compatibility -->
-        <item name="colorSecondaryContainer">#334155</item>
-        <item name="colorOnSecondaryContainer">#F8FAFC</item>
+        <item name="android:textColorPrimary">@color/text_primary_dark</item>
+        <item name="android:textColorSecondary">@color/text_secondary_dark</item>
+
+        <!-- Container styling -->
+        <item name="colorSecondaryContainer">#2D3748</item>
+        <item name="colorOnSecondaryContainer">@color/text_primary_dark</item>
     </style>
 </resources>

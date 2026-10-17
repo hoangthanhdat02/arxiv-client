@@ -3,15 +3,37 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Academic Paper Sheet -->
+
+    <!-- Warm Ivory Paper Canvas with Subtle Corner Radius -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M35,24h26l12,12v48H35V24z" />
+        android:fillColor="#F4F1EA"
+        android:pathData="M34,25h26l14,14v42c0,2.2 -1.8,4 -4,4H34c-2.2,0 -4,-1.8 -4,-4V29c0,-2.2 1.8,-4 4,-4z" />
+
+    <!-- Paper Corner Fold -->
     <path
-        android:fillColor="#E2E8F0"
-        android:pathData="M61,24v12h12L61,24z" />
-    <!-- Text Lines -->
+        android:fillColor="#DDD8CD"
+        android:pathData="M60,25v12c0,1.1 0.9,2 2,2h12L60,25z" />
+
+    <!-- Ceramic Teal Bookmark Ribbon (#0D9488) -->
     <path
-        android:fillColor="#B31B1B"
-        android:pathData="M42,46h24v3H42V46z M42,54h24v3H42V54z M42,62h16v3H42V62z" />
+        android:fillColor="#0D9488"
+        android:pathData="M38,24v18l5,-3.5l5,3.5V24z" />
+
+    <!-- Academic Paper Header Rule -->
+    <path
+        android:fillColor="#94A3B8"
+        android:pathData="M52,32h14v2.5H52V32z" />
+
+    <!-- Stylized arXiv Chi (χ) Mark in Brick Red (#B91C1C) and Deep Navy (#1E3A8A) -->
+    <path
+        android:fillColor="#B91C1C"
+        android:pathData="M44,48l6,0l12,22l-6,0z" />
+    <path
+        android:fillColor="#1E3A8A"
+        android:pathData="M62,48l-4,0l-14,22l4,0z" />
+
+    <!-- Article Detail Rule -->
+    <path
+        android:fillColor="#94A3B8"
+        android:pathData="M42,75h24v2H42V75z" />
 </vector>
