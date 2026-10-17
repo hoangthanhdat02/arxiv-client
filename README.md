@@ -1,96 +1,155 @@
-# 📱 arXiv Android Client (Java Native) - Topic 28
+# 📱 arXiv Android Client (Native Java) - Topic 28
 
-> **Ứng dụng Di động arXiv Client chuyên dụng cho nền tảng Android (Java Native)**  
-> Môn học: **Phát triển Ứng dụng Di động (Mobile Application Development)**  
-> Hình thức nghiệm thu: **Live Demo 100% trên Máy giả lập Android (AVD)** từ mã nguồn Android Studio (không dùng slide, không nộp báo cáo giấy).
+[![Platform](https://img.shields.io/badge/Platform-Android%20Native-3DDC84.svg?logo=android&logoColor=white)](https://developer.android.com/)
+[![Language](https://img.shields.io/badge/Language-Java%2017-ED8B00.svg?logo=openjdk&logoColor=white)](https://www.java.com/)
+[![Target SDK](https://img.shields.io/badge/Target%20SDK-34%20(Android%2014)-blue.svg)]()
+[![Min SDK](https://img.shields.io/badge/Min%20SDK-26%20(Android%208.0)-lightgrey.svg)]()
+[![Architecture](https://img.shields.io/badge/Architecture-MVVM%20%2F%20Clean%20UI-orange.svg)]()
 
----
-
-## 👥 Phân công trách nhiệm 5 thành viên Android (Theo Đặc tả dự án)
-
-* **🧑‍💻 Thành viên 1: Lập trình Khung Ứng dụng & Điều hướng (Đạt_con - Leader)**
-  * Khởi tạo dự án Android Java, cấu hình `build.gradle`, Git repo, `ViewBinding`.
-  * Lập trình `MainActivity` với `BottomNavigationView` và Fragment Container 4 tab (*Khám phá, Tìm kiếm, Đã lưu, Cài đặt*).
-  * Chuyển đổi Dark Mode & Light Mode qua `AppCompatDelegate`.
-  * Cấu hình `ApiClient` (Retrofit 2 + Gson) kết nối tới Backend Gateway (`10.0.2.2:3001`).
-
-* **🧑‍💻 Thành viên 3: Lập trình Trang chủ & Thẻ bài báo**
-  * Thiết kế `item_paper_card.xml` (CardView hiển thị tiêu đề, tác giả, badge chuyên mục, bookmark).
-  * Lập trình `PaperAdapter` cho `RecyclerView` hỗ trợ click mở đọc PDF.
-  * Lập trình `HomeFragment`: gọi API `/api/papers` qua Retrofit, hỗ trợ `SwipeRefreshLayout` và hiệu ứng khung xương (`Shimmer Loading`).
-  * Xử lý phân trang cuộn tải thêm bài báo mới.
-
-* **🧑‍💻 Thành viên 4: Lập trình Màn hình Tìm kiếm & Bộ lọc (Đức)**
-  * Thiết kế giao diện tìm kiếm `SearchFragment` với ô nhập liệu và `RecyclerView`.
-  * Viết class `DebounceTextWatcher` (delay 500ms) chống spam request khi gõ phím từ máy tính vào máy ảo.
-  * Lập trình `FilterBottomSheetDialog`: lọc chuyên mục `cs.AI`, `cs.LG` và sắp xếp theo ngày nộp / độ liên quan.
-  * Xử lý trạng thái rỗng (Empty State) và cấu hình bàn phím ảo `adjustResize` không làm vỡ layout.
-
-* **🧑‍💻 Thành viên 5: Lập trình Trình đọc PDF Native trong App (Ngo)**
-  * Lập trình `PdfReaderActivity` mở file PDF trực tiếp trong ứng dụng trên máy giả lập.
-  * Hỗ trợ thao tác cảm ứng/chuột: phóng to/thu nhỏ (Zoom in/out), lướt chuyển trang.
-  * Thanh công cụ hiển thị số trang hiện tại (`Trang X/Y`) và `SeekBar` nhảy nhanh đến trang mong muốn.
-  * Lưu lại trang đọc dở dang vào CSDL để tự động mở lại đúng trang ở lần sau.
-
-* **🧑‍💻 Thành viên 6: Lập trình Tải Tệp & Màn hình Cài đặt**
-  * Viết module `DownloadService`: tải file PDF ngầm vào bộ nhớ nội bộ của máy giả lập qua OkHttp.
-  * Cập nhật tiến độ tải theo % lên giao diện.
-  * Lập trình `SettingsFragment`: thống kê dung lượng bộ nhớ đã lưu file PDF trên máy ảo và nút "Dọn dẹp bộ nhớ / Xóa cache".
-
-* **🧑‍💻 Thành viên 7: Lập trình CSDL Cục bộ SQLite & Tiện ích (Hiếu Bigh)**
-  * Viết `ArxivDbHelper` quản lý 2 bảng `bookmarks` và `read_history` trong `arxiv_client.db`.
-  * Viết các hàm DAO CRUD: thêm bookmark, xóa, lưu đường dẫn file PDF offline.
-  * Lập trình màn hình `LibraryFragment`: đọc từ SQLite hiển thị danh sách bài báo ngoại tuyến **khi bật Chế độ máy bay (Airplane Mode)**.
-  * Tiện ích: Sao chép trích dẫn BibTeX vào `ClipboardManager` và chia sẻ bài báo qua Android Intent.
+> **Native Android Mobile Application for arXiv Academic Paper Discovery & Management**  
+> **Course:** Mobile Application Development  
+> **Evaluation Mode:** 100% Live Demonstration executed directly from source code on Android Virtual Device (AVD).
 
 ---
 
-## 🛠️ Công nghệ & Thư viện sử dụng
-* **Ngôn ngữ:** Java (JDK 17)
-* **IDE Khuyến nghị:** Android Studio Hedgehog / Iguana / Jellyfish trở lên.
-* **Môi trường chạy:** Máy giả lập Android (AVD) - Cấu hình khuyến nghị: Google Pixel 6 hoặc 7, Android 12 hoặc 13 (API 31–33), x86_64, Hardware Acceleration.
-* **Thư viện chính:**
-  * `Retrofit 2` + `Gson Converter`: Gọi REST API từ Backend ExpressJS.
-  * `OkHttp 3` + `Logging Interceptor`: Tải file PDF ngầm và ghi log mạng.
-  * `Material Components Android`: CardView, BottomNavigationView, TabLayout, Chips, Dialog.
-  * `SwipeRefreshLayout`: Kéo xuống để tải lại dữ liệu.
-  * `Facebook Shimmer`: Hiệu ứng khung xương khi tải trang.
-  * `SQLiteOpenHelper`: Quản lý CSDL cục bộ `arxiv_client.db`.
+## 📖 1. Project Overview
+
+**arXiv Android Client** is a high-performance native Android application written in Java. Engineered specifically for academic researchers, graduate students, and engineers, the application provides an intuitive mobile interface to track, explore, search, and read open-access research papers from [arXiv.org](https://arxiv.org/) across core computer science disciplines:
+* **`cs.AI`** (Artificial Intelligence)
+* **`cs.LG`** (Machine Learning)
+
+The mobile application is paired with a dedicated ExpressJS Gateway Service via the **`10.0.2.2`** emulator loopback interface, establishing a robust **Offline-First** architecture capable of seamless offline reading even with active **Airplane Mode**.
 
 ---
 
-## 📱 Hướng dẫn Mở và Chạy Dự án trên Android Studio
+## 👥 2. Team Member Responsibilities & Code Architecture
 
-### Bước 1: Khởi động Backend trước
-Đảm bảo bạn đã mở terminal chạy Backend ExpressJS tại thư mục `arxiv-backend`:
+100% of team members directly author core codebase modules according to project specification:
+
+```
+app/src/main/java/com/arxiv/client/
+├── MainActivity.java                    [TV1: Đạt_con (Leader)]
+├── data/
+│   ├── api/
+│   │   ├── ApiClient.java               [TV1: Đạt_con]
+│   │   └── ApiService.java              [TV1: Đạt_con]
+│   ├── db/
+│   │   └── ArxivDbHelper.java           [TV7: Hiếu Bigh]
+│   ├── download/
+│   │   └── DownloadService.java         [TV6: Member 6]
+│   └── model/
+│       ├── PaperItem.java               [TV1: Base Model]
+│       ├── PaperResponse.java           [TV1: Base Model]
+│       └── BibtexResponse.java          [TV7: Citation Model]
+└── ui/
+    ├── adapters/
+    │   └── PaperAdapter.java            [TV3: Member 3]
+    ├── base/
+    │   └── DebounceTextWatcher.java     [TV4: Đức]
+    ├── dialogs/
+    │   └── FilterBottomSheetDialog.java [TV4: Đức]
+    ├── home/
+    │   └── HomeFragment.java            [TV3: Member 3]
+    ├── library/
+    │   └── LibraryFragment.java         [TV7: Hiếu Bigh]
+    ├── reader/
+    │   └── PdfReaderActivity.java       [TV5: Ngo]
+    └── settings/
+        └── SettingsFragment.java        [TV6: Member 6]
+```
+
+### Module Breakdown:
+* **🧑‍💻 TV1: Team Leader & Base Architecture (Đạt_con)**
+  * Android Java project configuration, Gradle build scripts, ViewBinding, and Git structure.
+  * `MainActivity` with 4-tab `BottomNavigationView` container (*Explore, Search, Library, Settings*).
+  * System-wide Dynamic Theme engine (Light/Dark mode via `AppCompatDelegate`).
+  * Centralized Retrofit 2 + Gson network client (`ApiClient`).
+* **🧑‍💻 TV3: Home Feed & Custom RecyclerView (Member 3)**
+  * Custom `item_paper_card.xml` CardView layout with category badges and action buttons.
+  * High-performance `PaperAdapter` with view caching and click-to-read triggers.
+  * `HomeFragment` feed supporting category switching (`cs.AI` / `cs.LG`), `SwipeRefreshLayout` pull-to-refresh, Facebook Shimmer skeleton loading, and infinite scrolling pagination.
+* **🧑‍💻 TV4: Search & Multi-Criteria Filtering (Đức)**
+  * `SearchFragment` with asynchronous search query execution.
+  * `DebounceTextWatcher` with 500ms debounce interval to eliminate keystroke server flooding.
+  * `FilterBottomSheetDialog` for category filtering and sorting by date or relevance.
+  * Soft keyboard optimization (`adjustResize`) to maintain layout stability on virtual devices.
+* **🧑‍💻 TV5: In-App Native PDF Reader (Ngo)**
+  * Dedicated `PdfReaderActivity` rendering full scientific papers directly within the app.
+  * Multi-touch zoom controls (Pinch-to-zoom) and smooth page scrolling.
+  * Navigation bar with real-time page indicator (`Page X/Y`) and quick-jump `SeekBar`.
+  * Last-read page persistence via SQLite/SharedPreferences for automatic reading resume.
+* **🧑‍💻 TV6: Download Manager & Cache Settings (Member 6)**
+  * Asynchronous background PDF downloader (`DownloadService`) streaming files to private app storage.
+  * Real-time percentage download progress indicator and automatic offline state switching.
+  * `SettingsFragment` displaying active disk cache usage and one-tap cache purge.
+* **🧑‍💻 TV7: SQLite Database & Academic Utilities (Hiếu Bigh)**
+  * `ArxivDbHelper` managing `bookmarks` and `read_history` tables in `arxiv_client.db`.
+  * `LibraryFragment` with complete **Offline-First** capability during **Airplane Mode**.
+  * Single-tap BibTeX citation export to system `ClipboardManager` and native `ShareCompat` Android intents.
+
+---
+
+## 🛠️ 3. Technology Stack & Key Libraries
+
+| Component | Library / Framework | Purpose |
+| :--- | :--- | :--- |
+| **Language** | Java 17 | Core object-oriented mobile logic. |
+| **Networking** | Retrofit 2.9.0 + OkHttp 4.12.0 | Asynchronous RESTful communication with Express Gateway. |
+| **JSON Parser** | Google Gson 2.10.1 | Serialization and deserialization of POJO data models. |
+| **Design System** | Google Material Design 3 | Cards, BottomNavigationView, Chips, Dialogs, Switches. |
+| **Animation** | Facebook Shimmer 0.5.0 | Skeleton placeholder animation during asynchronous loading. |
+| **Pull-to-Refresh**| AndroidX SwipeRefreshLayout 1.1.0 | Gesture-driven data reloading. |
+| **Local Database**| Android Native SQLite (`SQLiteOpenHelper`)| Zero-dependency local persistence for offline papers. |
+
+---
+
+## 📱 4. Android Studio Setup & Emulator Instructions
+
+### Step 1: Start Backend Gateway Service
+Before launching the Android application, start the backend server:
 ```bash
+cd arxiv-backend
 npm start
 ```
-*(Server chạy tại cổng `http://localhost:3001`)*
+*(Confirms running at `http://localhost:3001` and accessible to emulator via `http://10.0.2.2:3001`).*
 
-### Bước 2: Mở dự án trên Android Studio
-1. Mở **Android Studio** -> Chọn **Open**.
-2. Trỏ đến thư mục: `d:\Application\arxiv-client` (hoặc nơi chứa mã nguồn repo này).
-3. Đợi Android Studio đồng bộ Gradle (**Gradle Sync**).
+### Step 2: Open Project in Android Studio
+1. Launch **Android Studio** (Hedgehog / Iguana / Jellyfish or newer).
+2. Click **Open** and select the project directory: `arxiv-client`.
+3. Allow Gradle to sync dependencies automatically (**Gradle Sync**).
 
-### Bước 3: Chạy trên Máy giả lập AVD
-1. Chọn máy giả lập (VD: `Pixel 7 API 33`).
-2. Bấm nút **Run (tam giác xanh)** hoặc phím tắt `Shift + F10`.
-3. Ứng dụng sẽ tự động được biên dịch và cài đặt mở lên trên màn hình máy giả lập!
+### Step 3: Run on Android Virtual Device (AVD)
+1. In the device selection dropdown, select an emulator:
+   * **Recommended Device:** Google Pixel 6 or Pixel 7.
+   * **System Image:** Android 12 or 13 (API 31 - 33), `x86_64` architecture, Hardware Acceleration enabled.
+2. Click the green **Run (▶)** button or press `Shift + F10`.
+3. The application will compile, install, and launch immediately on the emulator.
 
 ---
 
-## 🎬 Kịch bản 6 bước Live Demo khi Bảo vệ trước Giảng viên
+## 🎬 5. Six-Step Defense Live Demonstration Script
 
-1. **Bước 1: Khởi động & Khám phá (TV1 & TV3 - 1 phút):**  
-   Mở app trên AVD -> Thấy hiệu ứng Shimmer -> Danh sách bài báo cs.AI hiện ra từ ExpressJS -> Kéo chuột vuốt xuống để làm mới (Pull-to-refresh) -> Vào Cài đặt bật công tắc Dark Mode.
-2. **Bước 2: Tìm kiếm & Bộ lọc (TV4 - 1 phút):**  
-   Vào tab Tìm kiếm -> Gõ "transformer" (debounce 500ms không lag) -> Mở Bộ lọc chọn cs.LG -> Kết quả trả về ngay lập tức, bàn phím ảo đẩy lên không làm vỡ layout.
-3. **Bước 3: Đọc PDF Native trong App (TV5 - 1 phút):**  
-   Bấm vào bài báo -> Bấm "Đọc PDF" -> Trình đọc mở mượt mà -> Thao tác zoom to công thức, kéo thanh trượt chuyển trang.
-4. **Bước 4: Tải file & Quản lý bộ nhớ (TV6 - 30 giây):**  
-   Bấm "Tải về" -> Tiến độ % tải -> Vào Cài đặt xem dung lượng bộ nhớ cache trên máy ảo.
-5. **Bước 5: Thử nghiệm ngắt mạng (Điểm nhấn kỹ thuật - TV7):**  
-   Kéo thanh cài đặt nhanh của máy giả lập -> **Bật Chế độ máy bay (Airplane Mode)** -> Vào tab "Đã lưu" -> Các bài báo đã lưu từ SQLite vẫn mở đọc offline mượt mà.
-6. **Bước 6: Tiện ích học thuật (TV2 & TV7 - 30 giây):**  
-   Bấm "BibTeX" -> Báo đã sao chép -> Mở ứng dụng Ghi chú trên máy ảo dán trích dẫn chuẩn học thuật `@misc`.
+During final evaluation before the course instructors, follow this structured 6-minute live workflow:
+
+1. **Step 1: Application Launch & Explore Feed (TV1 & TV3 - 1 min)**
+   * Launch the app from the AVD home screen.
+   * Observe the Shimmer skeleton loading effect, followed by the latest `cs.AI` papers loaded dynamically from the backend.
+   * Drag down on the list to demonstrate gesture pull-to-refresh (`SwipeRefreshLayout`).
+   * Navigate to Settings to switch to **Dark Mode**; observe seamless theme transition.
+2. **Step 2: Debounced Search & Filtering (TV4 - 1 min)**
+   * Navigate to the **Search** tab. Type `"transformer"` from the host PC keyboard; note the 500ms debounce prevent server flooding.
+   * Open the **Filter Bottom Sheet Dialog**, select category `cs.LG`, and sort by date.
+   * Demonstrate responsive layout behavior when the virtual keyboard appears (`adjustResize`).
+3. **Step 3: Native In-App PDF Reading (TV5 - 1 min)**
+   * Select a paper card and tap **Read PDF**.
+   * Demonstrate pinch-to-zoom on complex mathematical equations and smooth page scrolling.
+   * Drag the bottom `SeekBar` slider to jump directly across pages; observe the page counter (`Page X/Y`).
+4. **Step 4: File Download & Storage Management (TV6 - 30 sec)**
+   * Tap the **Download** button; observe the real-time download percentage progress.
+   * Navigate to **Settings**; demonstrate active disk storage calculation and verify the cache clearing action.
+5. **Step 5: Airplane Mode Offline Verification (TV7 - Core Technical Highlight)**
+   * Pull down the emulator's system notification tray and **Enable Airplane Mode** (severing all network access).
+   * Navigate to the **Library** tab; demonstrate that all bookmarked papers and downloaded PDFs open seamlessly from the local SQLite database (`arxiv_client.db`).
+6. **Step 6: Academic Utilities (TV2 & TV7 - 30 sec)**
+   * Tap **BibTeX** on any paper card to trigger clipboard copy.
+   * Open the AVD Notes application and paste the standard academic `@misc` block.
