@@ -90,8 +90,12 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
         holder.progressBar.setVisibility(View.VISIBLE);
 
         renderExecutor.execute(() -> {
+            if (holder.boundPosition != position) return;
+            if (bitmapCache.get(position) != null) return;
+
             Bitmap renderedBitmap = null;
             synchronized (pdfRenderer) {
+                if (holder.boundPosition != position) return;
                 if (position >= 0 && position < totalPages) {
                     PdfRenderer.Page page = null;
                     try {
@@ -146,6 +150,7 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
     public void onViewRecycled(@NonNull PageViewHolder holder) {
         super.onViewRecycled(holder);
         activeHolders.remove(holder.boundPosition);
+        holder.boundPosition = -1;
         holder.zoomableImageView.resetZoom();
         holder.zoomableImageView.setImageBitmap(null);
     }
@@ -177,7 +182,7 @@ public class PdfPagerAdapter extends RecyclerView.Adapter<PdfPagerAdapter.PageVi
     public static class PageViewHolder extends RecyclerView.ViewHolder {
         final ZoomableImageView zoomableImageView;
         final ProgressBar progressBar;
-        int boundPosition = -1;
+        volatile int boundPosition = -1;
 
         /** Binds the page image and loading indicator from the supplied item layout. */
         public PageViewHolder(@NonNull View itemView) {

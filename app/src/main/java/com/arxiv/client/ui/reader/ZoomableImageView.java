@@ -31,6 +31,7 @@ public class ZoomableImageView extends AppCompatImageView {
     private float currentScale = 1.0f;
 
     private final PointF lastTouch = new PointF();
+    private int activePointerId = MotionEvent.INVALID_POINTER_ID;
     private boolean isDragging = false;
 
     /** Creates a zoomable image view programmatically and initializes gesture detection. */
@@ -118,21 +119,30 @@ public class ZoomableImageView extends AppCompatImageView {
             if (getParent() != null) {
                 getParent().requestDisallowInterceptTouchEvent(true);
             }
+            lastTouch.set(scaleDetector.getFocusX(), scaleDetector.getFocusY());
             return true;
         }
 
         switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN:
-                lastTouch.set(event.getX(), event.getY());
+            case MotionEvent.ACTION_DOWN: {
+                int index = event.getActionIndex();
+                activePointerId = event.getPointerId(index);
+                lastTouch.set(event.getX(index), event.getY(index));
                 if (currentScale > 1.01f && getParent() != null) {
                     getParent().requestDisallowInterceptTouchEvent(true);
                 }
                 isDragging = false;
                 break;
+            }
 
-            case MotionEvent.ACTION_MOVE:
-                float dx = event.getX() - lastTouch.x;
-                float dy = event.getY() - lastTouch.y;
+            case MotionEvent.ACTION_MOVE: {
+                int pointerIndex = event.findPointerIndex(activePointerId);
+                if (pointerIndex == -1) break;
+
+                float x = event.getX(pointerIndex);
+                float y = event.getY(pointerIndex);
+                float dx = x - lastTouch.x;
+                float dy = y - lastTouch.y;
 
                 if (currentScale > 1.01f) {
                     if (getParent() != null) {
@@ -143,11 +153,24 @@ public class ZoomableImageView extends AppCompatImageView {
                     setImageMatrix(matrix);
                     isDragging = true;
                 }
-                lastTouch.set(event.getX(), event.getY());
+                lastTouch.set(x, y);
                 break;
+            }
+
+            case MotionEvent.ACTION_POINTER_UP: {
+                int pointerIndex = event.getActionIndex();
+                int pointerId = event.getPointerId(pointerIndex);
+                if (pointerId == activePointerId) {
+                    int newPointerIndex = (pointerIndex == 0) ? 1 : 0;
+                    lastTouch.set(event.getX(newPointerIndex), event.getY(newPointerIndex));
+                    activePointerId = event.getPointerId(newPointerIndex);
+                }
+                break;
+            }
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                activePointerId = MotionEvent.INVALID_POINTER_ID;
                 isDragging = false;
                 if (currentScale <= 1.01f && getParent() != null) {
                     getParent().requestDisallowInterceptTouchEvent(false);
@@ -252,7 +275,13 @@ public class ZoomableImageView extends AppCompatImageView {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             applyScale(detector.getScaleFactor(), detector.getFocusX(), detector.getFocusY());
+            lastTouch.set(detector.getFocusX(), detector.getFocusY());
             return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            lastTouch.set(detector.getFocusX(), detector.getFocusY());
         }
     }
 

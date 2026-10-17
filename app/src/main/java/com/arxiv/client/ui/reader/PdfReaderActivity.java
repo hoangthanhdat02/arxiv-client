@@ -284,8 +284,6 @@ public class PdfReaderActivity extends AppCompatActivity {
     }
 
     /**
-     * Downloads a PDF to a temporary file on a background thread, then publishes it
-     * to the cache. Opens it if the activity is still acti    /**
      * Downloads a paper's PDF to a temporary file, moves it to destination, and displays it.
      *
      * @param url source PDF URL
@@ -380,6 +378,9 @@ public class PdfReaderActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
+            if (pdfFile != null && pdfFile.exists() && (paper == null || !DownloadService.isPdfDownloaded(this, paper.getId()))) {
+                pdfFile.delete();
+            }
             showError("Lỗi khởi tạo trình đọc PDF native: " + e.getMessage());
         }
     }
