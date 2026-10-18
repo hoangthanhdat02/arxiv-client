@@ -98,17 +98,56 @@
             android:max="100"
             android:progress="0" />
     </LinearLayout>
-
-    <!-- PDF Viewer Container / WebView & Native Renderer -->
+    <!-- PDF Viewer Container / Native Renderer -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <WebView
-            android:id="@+id/web_pdf_viewer"
+        <!-- Clean placeholder when PDF is not yet downloaded -->
+        <LinearLayout
+            android:id="@+id/layout_not_downloaded"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:src="@android:drawable/stat_sys_download"
+                android:tint="@color/primary"
+                android:contentDescription="Tải PDF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Tệp PDF chưa được tải về máy"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Nhấn nút tải bên dưới để lưu toàn bộ bài báo vào bộ nhớ và đọc ngoại tuyến với chất lượng cao bằng Native PdfRenderer."
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_center_download"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/primary"
+                android:text="Tải PDF về máy ngay"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/img_pdf_page"
@@ -123,7 +162,8 @@
             android:id="@+id/pdf_progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:visibility="gone" />
     </FrameLayout>
 
     <!-- Bottom Slider Bar for Quick Page Jumping -->
