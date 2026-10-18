@@ -76,6 +76,10 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
                 ? android.R.drawable.btn_star_big_on
                 : android.R.drawable.btn_star_big_off);
 
+        // Check offline PDF download status
+        boolean isDownloaded = com.arxiv.client.data.download.DownloadService.isPdfDownloaded(context, paper.getId());
+        holder.btnReadPdf.setText(isDownloaded ? "Mở file Offline" : "Tải PDF về máy");
+
         // Action: Read PDF in-app
         View.OnClickListener openPdfListener = v -> {
             Intent intent = new Intent(context, PdfReaderActivity.class);

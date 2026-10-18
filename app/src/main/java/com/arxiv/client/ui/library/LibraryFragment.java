@@ -49,6 +49,10 @@ public class LibraryFragment extends Fragment {
     }
 
     private void loadSavedBookmarks() {
+        if (!isAdded()) return;
+        // Sync any downloaded PDF files on disk into database
+        dbHelper.syncDownloadedFiles(requireContext());
+
         List<PaperItem> savedPapers = dbHelper.getAllBookmarks();
         if (savedPapers == null || savedPapers.isEmpty()) {
             layoutEmpty.setVisibility(View.VISIBLE);

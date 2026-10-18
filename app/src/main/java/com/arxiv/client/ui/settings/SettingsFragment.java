@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import com.arxiv.client.R;
+import com.arxiv.client.data.db.ArxivDbHelper;
 import com.arxiv.client.data.download.DownloadService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -54,6 +55,7 @@ public class SettingsFragment extends Fragment {
         // Clear cache
         btnClearCache.setOnClickListener(v -> {
             DownloadService.clearPdfCache(requireContext());
+            ArxivDbHelper.getInstance(requireContext()).clearAllLocalPdfPaths();
             updateCacheSizeText();
             Toast.makeText(requireContext(), "Đã dọn sạch bộ nhớ cache PDF trên máy ảo!", Toast.LENGTH_SHORT).show();
         });
@@ -61,9 +63,16 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateCacheSizeText();
+    }
+
     private void updateCacheSizeText() {
+        if (!isAdded()) return;
         long bytes = DownloadService.getCacheSize(requireContext());
         double mb = bytes / (1024.0 * 1024.0);
-        tvCacheSize.setText(String.format("%.2f MB (Tệp PDF ngoại tuyến trong máy ảo)", mb));
+        tvCacheSize.setText(String.format(java.util.Locale.getDefault(), "%.2f MB (Tệp PDF ngoại tuyến trong máy ảo)", mb));
     }
 }
