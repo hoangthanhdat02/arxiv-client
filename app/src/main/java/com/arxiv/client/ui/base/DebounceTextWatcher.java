@@ -34,5 +34,12 @@ public abstract class DebounceTextWatcher implements TextWatcher {
         handler.postDelayed(runnable, delayMs);
     }
 
+    public void cancel() {
+        if (runnable != null) {
+            handler.removeCallbacks(runnable);
+            runnable = null;
+        }
+    }
+
     public abstract void onDebouncedTextChange(String text);
 }
