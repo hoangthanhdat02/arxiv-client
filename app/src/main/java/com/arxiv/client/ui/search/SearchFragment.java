@@ -8,7 +8,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -51,7 +50,6 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
         recyclerSearchResults = view.findViewById(R.id.recycler_search_results);
 
         paperAdapter = new PaperAdapter(requireContext());
-        paperAdapter.setHeroEnabled(false);
         recyclerSearchResults.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerSearchResults.setAdapter(paperAdapter);
 
@@ -70,9 +68,6 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
             dialog.show(getParentFragmentManager(), "FilterBottomSheetDialog");
         });
 
-        // Setup BBC quick topic filter chips
-        setupQuickCategoryChips(view);
-
         // Default initial search
         currentQuery = "transformer";
         etSearch.setText(currentQuery);
@@ -81,86 +76,37 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
         return view;
     }
 
-    private void setupQuickCategoryChips(View root) {
-        TextView chipAll = root.findViewById(R.id.chip_cat_all);
-        TextView chipAi = root.findViewById(R.id.chip_cat_ai);
-        TextView chipLg = root.findViewById(R.id.chip_cat_lg);
-
-        TextView[] chips = {chipAll, chipAi, chipLg};
-        String[] cats = {"", "cs.AI", "cs.LG"};
-
-        for (int i = 0; i < chips.length; i++) {
-            final int index = i;
-            if (chips[i] != null) {
-                chips[i].setOnClickListener(v -> {
-                    selectedCategory = cats[index];
-                    for (int j = 0; j < chips.length; j++) {
-                        if (chips[j] != null) {
-                            if (j == index) {
-                                chips[j].setBackgroundResource(R.drawable.badge_brand_box);
-                                chips[j].setTextColor(0xFFFFFFFF);
-                            } else {
-                                chips[j].setBackgroundResource(R.drawable.badge_offline_bg);
-                                chips[j].setTextColor(requireContext().getColor(R.color.badge_offline_text));
-                            }
-                        }
-                    }
-                    performSearch();
-                });
-            }
-        }
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        etSearch = null;
-        btnFilter = null;
-        progressBar = null;
-        layoutEmpty = null;
-        recyclerSearchResults = null;
-    }
-
     private void performSearch() {
         if (currentQuery.isEmpty()) {
-            if (paperAdapter != null) paperAdapter.setPapers(null);
-            if (layoutEmpty != null) layoutEmpty.setVisibility(View.VISIBLE);
+            paperAdapter.setPapers(null);
+            layoutEmpty.setVisibility(View.VISIBLE);
             return;
         }
 
-        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
-        if (layoutEmpty != null) layoutEmpty.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+        layoutEmpty.setVisibility(View.GONE);
 
         ApiClient.getApiService().searchPapers(currentQuery, selectedCategory, selectedSort, 0, 15).enqueue(new Callback<PaperResponse>() {
             @Override
             public void onResponse(Call<PaperResponse> call, Response<PaperResponse> response) {
-                if (!isAdded() || getContext() == null || getView() == null) return;
-
-                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     List<PaperItem> papers = response.body().getData();
-                    if (paperAdapter != null) {
-                        paperAdapter.setPapers(papers);
-                    }
-                    if (layoutEmpty != null) {
-                        if (papers == null || papers.isEmpty()) {
-                            layoutEmpty.setVisibility(View.VISIBLE);
-                        } else {
-                            layoutEmpty.setVisibility(View.GONE);
-                        }
+                    paperAdapter.setPapers(papers);
+                    if (papers == null || papers.isEmpty()) {
+                        layoutEmpty.setVisibility(View.VISIBLE);
+                    } else {
+                        layoutEmpty.setVisibility(View.GONE);
                     }
                 } else {
-                    if (layoutEmpty != null) {
-                        layoutEmpty.setVisibility(View.VISIBLE);
-                    }
+                    layoutEmpty.setVisibility(View.VISIBLE);
                 }
             }
 
             @Override
             public void onFailure(Call<PaperResponse> call, Throwable t) {
-                if (!isAdded() || getContext() == null || getView() == null) return;
-                if (progressBar != null) progressBar.setVisibility(View.GONE);
-                if (layoutEmpty != null) layoutEmpty.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+                layoutEmpty.setVisibility(View.VISIBLE);
             }
         });
     }

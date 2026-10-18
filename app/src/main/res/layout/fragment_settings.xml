@@ -10,115 +10,22 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- BBC-style Editorial Header -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <!-- BBC-style 3 Square Blocks: [ar][X][iv] -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:background="@drawable/bbc_box_navy"
-                        android:gravity="center"
-                        android:text="ar"
-                        android:textColor="#FFFFFF"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginStart="2dp"
-                        android:background="@drawable/bbc_box_red"
-                        android:gravity="center"
-                        android:text="X"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13.5sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginStart="2dp"
-                        android:background="@drawable/bbc_box_navy"
-                        android:gravity="center"
-                        android:text="iv"
-                        android:textColor="#FFFFFF"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:fontFamily="@font/inter"
-                    android:text="SETTINGS"
-                    android:textColor="?attr/colorPrimary"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.04" />
-
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:text="Application theme, storage cache and arXiv service configuration"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="11.5sp" />
-        </LinearLayout>
-
-        <!-- Section 1: Appearance & Display Header -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="6dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <View
-                android:layout_width="4dp"
-                android:layout_height="14dp"
-                android:background="@drawable/badge_brand_box" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.08"
-                android:text="APPEARANCE &amp; DISPLAY"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="11.5sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+            android:text="Cài Đặt &amp; Hệ Thống"
+            android:textColor="@color/primary"
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
         <!-- Card: Appearance (Dark Mode) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             app:cardCornerRadius="10dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/card_bg"
-            app:strokeColor="@color/card_border"
+            app:strokeColor="@color/border_light"
             app:strokeWidth="1dp">
 
             <LinearLayout
@@ -140,45 +47,18 @@
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switch_dark_mode"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:thumbTint="?attr/colorPrimary" />
+                    android:layout_height="wrap_content" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- Section 2: Storage Header -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:layout_marginBottom="6dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <View
-                android:layout_width="4dp"
-                android:layout_height="14dp"
-                android:background="@drawable/badge_brand_box" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.08"
-                android:text="STORAGE &amp; OFFLINE DATA"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="11.5sp"
-                android:textStyle="bold" />
-        </LinearLayout>
 
         <!-- Card: Storage & Cache -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             app:cardCornerRadius="10dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/card_bg"
-            app:strokeColor="@color/card_border"
+            app:strokeColor="@color/border_light"
             app:strokeWidth="1dp">
 
             <LinearLayout
@@ -200,7 +80,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="0.00 MB (Offline PDF files &amp; SQLite cache)"
+                    android:text="12.4 MB (Tệp PDF &amp; CSDL SQLite ngoại tuyến)"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="13sp" />
 
@@ -211,45 +91,19 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="@string/settings_clear_cache"
-                    android:textColor="?attr/colorPrimary"
-                    app:strokeColor="?attr/colorPrimary" />
+                    android:textColor="@color/primary"
+                    app:strokeColor="@color/primary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- Section 3: About Header -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:layout_marginBottom="6dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <View
-                android:layout_width="4dp"
-                android:layout_height="14dp"
-                android:background="@drawable/badge_brand_box" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.08"
-                android:text="ABOUT &amp; DATA ATTRIBUTION"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="11.5sp"
-                android:textStyle="bold" />
-        </LinearLayout>
 
         <!-- Card: About / Academic Disclaimers -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             app:cardCornerRadius="10dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/card_bg"
-            app:strokeColor="@color/card_border"
+            app:strokeColor="@color/border_light"
             app:strokeWidth="1dp">
 
             <LinearLayout
@@ -261,7 +115,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="About Project"
+                    android:text="Thông Tin Dự Án"
                     android:textColor="?android:attr/textColorPrimary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -278,7 +132,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Connected Server: ExpressJS Gateway (10.0.2.2:3001)"
+                    android:text="Máy chủ kết nối: ExpressJS Gateway (10.0.2.2:3001)"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp" />
 

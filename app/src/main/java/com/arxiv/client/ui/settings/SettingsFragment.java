@@ -17,7 +17,6 @@ import com.arxiv.client.R;
 import com.arxiv.client.data.download.DownloadService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import java.util.Locale;
 
 public class SettingsFragment extends Fragment {
 
@@ -35,37 +34,18 @@ public class SettingsFragment extends Fragment {
         tvCacheSize = view.findViewById(R.id.tv_cache_size);
         btnClearCache = view.findViewById(R.id.btn_clear_cache);
 
-        Context context = getContext();
-        if (context != null) {
-            prefs = context.getSharedPreferences("arxiv_prefs", Context.MODE_PRIVATE);
-        }
+        prefs = requireContext().getSharedPreferences("arxiv_prefs", Context.MODE_PRIVATE);
 
         // Dark mode setup
         int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         boolean isNight = (currentNightMode == Configuration.UI_MODE_NIGHT_YES);
-
-        // Remove listener before setChecked to prevent false triggers during inflation
-        switchDarkMode.setOnCheckedChangeListener(null);
         switchDarkMode.setChecked(isNight);
 
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            int currentMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            boolean currentlyNight = (currentMode == Configuration.UI_MODE_NIGHT_YES);
-
-            // Avoid loop or duplicate recreation if already in that mode
-            if (isChecked == currentlyNight) {
-                return;
-            }
-
-            if (prefs != null) {
-                prefs.edit().putBoolean("dark_mode", isChecked).apply();
-            }
-            int targetMode = isChecked
+            prefs.edit().putBoolean("dark_mode", isChecked).apply();
+            AppCompatDelegate.setDefaultNightMode(isChecked
                     ? AppCompatDelegate.MODE_NIGHT_YES
-                    : AppCompatDelegate.MODE_NIGHT_NO;
-            if (AppCompatDelegate.getDefaultNightMode() != targetMode) {
-                AppCompatDelegate.setDefaultNightMode(targetMode);
-            }
+                    : AppCompatDelegate.MODE_NIGHT_NO);
         });
 
         // Cache size display
@@ -73,47 +53,17 @@ public class SettingsFragment extends Fragment {
 
         // Clear cache
         btnClearCache.setOnClickListener(v -> {
-            Context ctx = getContext();
-            if (ctx == null || !isAdded()) return;
-            DownloadService.clearPdfCache(ctx);
+            DownloadService.clearPdfCache(requireContext());
             updateCacheSizeText();
-            Toast.makeText(ctx, "PDF cache cleared successfully!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Đã dọn sạch bộ nhớ cache PDF trên máy ảo!", Toast.LENGTH_SHORT).show();
         });
 
         return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (isAdded() && getContext() != null) {
-            updateCacheSizeText();
-        }
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        if (!hidden && isAdded() && getContext() != null) {
-            updateCacheSizeText();
-        }
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        switchDarkMode = null;
-        tvCacheSize = null;
-        btnClearCache = null;
-    }
-
     private void updateCacheSizeText() {
-        if (!isAdded() || getContext() == null || tvCacheSize == null) {
-            return;
-        }
-        Context ctx = getContext();
-        long bytes = DownloadService.getCacheSize(ctx);
+        long bytes = DownloadService.getCacheSize(requireContext());
         double mb = bytes / (1024.0 * 1024.0);
-        tvCacheSize.setText(String.format(Locale.US, "%.2f MB (Offline PDF files on device)", mb));
+        tvCacheSize.setText(String.format("%.2f MB (Tệp PDF ngoại tuyến trong máy ảo)", mb));
     }
 }

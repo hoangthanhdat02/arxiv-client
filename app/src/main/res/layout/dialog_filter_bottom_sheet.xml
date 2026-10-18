@@ -9,9 +9,8 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/inter"
-        android:text="Search Filters"
-        android:textColor="?attr/colorPrimary"
+        android:text="Bộ Lọc Tìm Kiếm"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -20,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="arXiv Category:"
+        android:text="Chuyên mục arXiv:"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp"
         android:textStyle="bold" />
@@ -38,21 +37,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="All (AI &amp; LG)" />
+            android:text="Tất cả (AI &amp; LG)" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_ai"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="cs.AI (Artificial Intelligence)" />
+            android:text="cs.AI (Trí tuệ nhân tạo)" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_lg"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="cs.LG (Machine Learning)" />
+            android:text="cs.LG (Học máy)" />
     </com.google.android.material.chip.ChipGroup>
 
     <!-- Sort By -->
@@ -60,7 +59,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Sort Results By:"
+        android:text="Sắp xếp kết quả theo:"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp"
         android:textStyle="bold" />
@@ -76,13 +75,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Most Relevant" />
+            android:text="Độ liên quan cao nhất" />
 
         <RadioButton
             android:id="@+id/radio_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Latest (Submitted Date)" />
+            android:text="Mới nhất (Ngày công bố)" />
     </RadioGroup>
 
     <!-- Apply Button -->
@@ -91,9 +90,7 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_marginTop="20dp"
-        android:backgroundTint="@color/button_primary_bg"
-        android:textColor="@color/button_primary_text"
-        android:text="Apply Filters"
+        android:text="Áp dụng bộ lọc"
         app:cornerRadius="8dp" />
 
 </LinearLayout>

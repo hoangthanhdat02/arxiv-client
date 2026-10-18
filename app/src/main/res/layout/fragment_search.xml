@@ -5,108 +5,27 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- BBC-style Top Editorial Masthead -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="14dp"
-        android:paddingBottom="6dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <!-- BBC-style 3 Square Blocks: [ar][X][iv] -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:background="@drawable/bbc_box_navy"
-                    android:gravity="center"
-                    android:text="ar"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_marginStart="2dp"
-                    android:background="@drawable/bbc_box_red"
-                    android:gravity="center"
-                    android:text="X"
-                    android:textColor="#FFFFFF"
-                    android:textSize="13.5sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_marginStart="2dp"
-                    android:background="@drawable/bbc_box_navy"
-                    android:gravity="center"
-                    android:text="iv"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/inter"
-                android:text="DISCOVER"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.04" />
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:text="Query articles by title, abstract, authors or category"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="11.5sp" />
-    </LinearLayout>
-
     <!-- Search Header Card -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="6dp"
+        android:layout_margin="12dp"
         app:cardCornerRadius="10dp"
         app:cardElevation="2dp"
-        app:cardBackgroundColor="@color/card_bg"
-        app:strokeColor="@color/card_border"
+        app:strokeColor="@color/border_light"
         app:strokeWidth="1dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="50dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="12dp">
 
             <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:contentDescription="Search Icon"
-                app:tint="?attr/colorPrimary"
                 android:src="@android:drawable/ic_menu_search" />
 
             <EditText
@@ -116,78 +35,21 @@
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:background="@null"
-                android:fontFamily="@font/inter"
                 android:hint="@string/search_hint"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textColorHint="?android:attr/textColorSecondary"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:maxLines="1"
-                android:textSize="14sp" />
+                android:textSize="15sp" />
 
             <ImageButton
                 android:id="@+id/btn_filter"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="Filter"
                 android:src="@android:drawable/ic_menu_manage" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-
-    <!-- BBC Quick Topic Filter Strip -->
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:paddingHorizontal="12dp"
-        android:paddingBottom="4dp">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/chip_cat_all"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/badge_brand_box"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp"
-                android:text="ALL"
-                android:textColor="#FFFFFF"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/chip_cat_ai"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/badge_bg"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp"
-                android:text="cs.AI"
-                android:textColor="@color/badge_ai"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/chip_cat_lg"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/badge_offline_bg"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp"
-                android:text="cs.LG"
-                android:textColor="@color/badge_offline_text"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-    </HorizontalScrollView>
 
     <!-- Loading Indicator -->
     <ProgressBar
@@ -231,7 +93,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingTop="6dp"
         android:paddingBottom="16dp" />
 
 </LinearLayout>
