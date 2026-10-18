@@ -32,7 +32,8 @@ import retrofit2.Response;
 
 /**
  * Search & Filter module (Thành viên 4 - Đức).
- * Handles keyword search with 500ms debounce, category/sort filtering via BottomSheet,
+ * Handles keyword search with 500ms debounce, category/sort filtering via
+ * BottomSheet,
  * infinite scroll pagination, and network error recovery.
  */
 public class SearchFragment extends Fragment implements FilterBottomSheetDialog.FilterListener {
@@ -53,6 +54,7 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
     private Chip chipActiveSort;
     private RecyclerView recyclerSearchResults;
     private PaperAdapter paperAdapter;
+    private DebounceTextWatcher debounceTextWatcher;
 
     // Search state
     private String currentQuery = "";
@@ -67,7 +69,8 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
         bindViews(view);
@@ -109,7 +112,8 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
         recyclerSearchResults.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                if (dy <= 0) return; // only on scroll down
+                if (dy <= 0)
+                    return; // only on scroll down
                 int visibleCount = layoutManager.getChildCount();
                 int totalCount = layoutManager.getItemCount();
                 int firstVisible = layoutManager.findFirstVisibleItemPosition();
@@ -122,30 +126,40 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
 
     private void setupSearchInput() {
         // Debounce: wait 500ms after user stops typing before sending request
-        etSearch.addTextChangedListener(new DebounceTextWatcher(500) {
+        debounceTextWatcher = new DebounceTextWatcher(500) {
             @Override
             public void onDebouncedTextChange(String text) {
                 currentQuery = text != null ? text.trim() : "";
                 resetAndSearch();
             }
-        });
+        };
+        etSearch.addTextChangedListener(debounceTextWatcher);
 
         // Show/hide clear button as user types (non-debounced, instant feedback)
         etSearch.addTextChangedListener(new android.text.TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 btnClear.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
             }
+
             @Override
-            public void afterTextChanged(android.text.Editable s) {}
+            public void afterTextChanged(android.text.Editable s) {
+            }
         });
 
-        // Enter key on virtual keyboard triggers immediate search (bypass debounce)
+        // Enter key on virtual keyboard triggers immediate search (cancels pending
+        // debounce to avoid duplicate request)
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH
-                    || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                    || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                            && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                if (debounceTextWatcher != null) {
+                    debounceTextWatcher.cancel();
+                }
                 currentQuery = etSearch.getText().toString().trim();
                 resetAndSearch();
                 return true;
@@ -153,8 +167,11 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
             return false;
         });
 
-        // Clear button: wipe text, reset results
+        // Clear button: cancel pending debounce, wipe text, reset results
         btnClear.setOnClickListener(v -> {
+            if (debounceTextWatcher != null) {
+                debounceTextWatcher.cancel();
+            }
             etSearch.setText("");
             currentQuery = "";
             resetAndSearch();
@@ -209,12 +226,12 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
     }
 
     private void loadMoreResults() {
-        currentPage++;
         performSearch(false);
     }
 
     /**
-     * @param isNewSearch true = replace existing results; false = append (pagination)
+     * @param isNewSearch true = replace existing results; false = append
+     *                    (pagination)
      */
     private void performSearch(boolean isNewSearch) {
         boolean hasQuery = !currentQuery.trim().isEmpty();
@@ -224,7 +241,8 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
         if (!hasQuery && !hasFilter) {
             showState(State.EMPTY);
             tvResultCount.setVisibility(View.GONE);
-            if (isNewSearch) paperAdapter.setPapers(null);
+            if (isNewSearch)
+                paperAdapter.setPapers(null);
             return;
         }
 
@@ -238,16 +256,20 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
             showState(State.LOADING);
         }
 
+        final int targetPage = isNewSearch ? 0 : currentPage + 1;
+
         currentCall = ApiClient.getApiService().searchPapers(
-                currentQuery, selectedCategory, selectedSort, currentPage, PAGE_SIZE);
+                currentQuery, selectedCategory, selectedSort, targetPage, PAGE_SIZE);
 
         currentCall.enqueue(new Callback<PaperResponse>() {
             @Override
             public void onResponse(Call<PaperResponse> call, Response<PaperResponse> response) {
                 isLoading = false;
-                if (call.isCanceled()) return;
+                if (call.isCanceled())
+                    return;
 
                 if (response.isSuccessful() && response.body() != null) {
+                    currentPage = targetPage;
                     PaperResponse body = response.body();
                     List<PaperItem> papers = body.getData();
 
@@ -270,14 +292,16 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
                         updateResultCount(body.getTotalResults());
                     }
                 } else {
-                    if (isNewSearch) showState(State.ERROR);
+                    if (isNewSearch)
+                        showState(State.ERROR);
                 }
             }
 
             @Override
             public void onFailure(Call<PaperResponse> call, Throwable t) {
                 isLoading = false;
-                if (call.isCanceled()) return;
+                if (call.isCanceled())
+                    return;
                 if (isNewSearch) {
                     showState(State.ERROR);
                     if (tvErrorMessage != null) {
@@ -292,7 +316,9 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
     // UI state management
     // ──────────────────────────────────────────────
 
-    private enum State { LOADING, EMPTY, ERROR, RESULTS }
+    private enum State {
+        LOADING, EMPTY, ERROR, RESULTS
+    }
 
     private void showState(State state) {
         progressBar.setVisibility(state == State.LOADING ? View.VISIBLE : View.GONE);
@@ -333,6 +359,17 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
             chipActiveSort.setText("submittedDate".equals(selectedSort) ? "Mới nhất" : selectedSort);
         } else {
             chipActiveSort.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (debounceTextWatcher != null) {
+            debounceTextWatcher.cancel();
+        }
+        if (currentCall != null && !currentCall.isCanceled()) {
+            currentCall.cancel();
         }
     }
 }
