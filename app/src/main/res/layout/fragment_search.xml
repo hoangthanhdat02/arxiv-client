@@ -41,58 +41,172 @@
                 android:maxLines="1"
                 android:textSize="15sp" />
 
+            <!-- Clear text button: hidden until user types -->
+            <ImageButton
+                android:id="@+id/btn_clear"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="Xóa từ khóa"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:visibility="gone" />
+
             <ImageButton
                 android:id="@+id/btn_filter"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="Filter"
+                android:contentDescription="Bộ lọc"
                 android:src="@android:drawable/ic_menu_manage" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Loading Indicator -->
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="16dp"
-        android:visibility="gone" />
-
-    <!-- Empty State Text -->
+    <!-- Active filter chips bar: shows selected category/sort when non-default -->
     <LinearLayout
-        android:id="@+id/layout_empty"
+        android:id="@+id/layout_active_filters"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="24dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp"
+        android:paddingBottom="4dp"
+        android:gravity="center_vertical"
         android:visibility="gone">
 
-        <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:alpha="0.4"
-            android:src="@android:drawable/ic_menu_search" />
-
         <TextView
+            android:id="@+id/tv_active_filter_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/empty_search"
+            android:text="Bộ lọc:"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="15sp" />
+            android:textSize="12sp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_active_category"
+            style="@style/Widget.MaterialComponents.Chip.Action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:visibility="gone"
+            android:textSize="12sp"
+            app:closeIconVisible="true"
+            app:chipMinHeight="28dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_active_sort"
+            style="@style/Widget.MaterialComponents.Chip.Action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:visibility="gone"
+            android:textSize="12sp"
+            app:closeIconVisible="true"
+            app:chipMinHeight="28dp" />
     </LinearLayout>
 
-    <!-- Search Results RecyclerView -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_search_results"
+    <!-- Result count indicator -->
+    <TextView
+        android:id="@+id/tv_result_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="4dp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <!-- Content area: Loading / Empty / Results share the same space -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="16dp" />
+        android:layout_weight="1">
+
+        <!-- Loading Indicator -->
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <!-- Empty State -->
+        <LinearLayout
+            android:id="@+id/layout_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:alpha="0.4"
+                android:src="@android:drawable/ic_menu_search" />
+
+            <TextView
+                android:id="@+id/tv_empty_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/empty_search"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/tv_empty_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Thử tìm: transformer, GPT, diffusion model..."
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp"
+                android:alpha="0.6" />
+        </LinearLayout>
+
+        <!-- Network Error State -->
+        <LinearLayout
+            android:id="@+id/layout_error"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:alpha="0.4"
+                android:src="@android:drawable/stat_notify_error" />
+
+            <TextView
+                android:id="@+id/tv_error_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Không thể kết nối máy chủ"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="15sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_retry"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Thử lại"
+                app:cornerRadius="8dp" />
+        </LinearLayout>
+
+        <!-- Search Results RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_search_results"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="16dp" />
+
+    </FrameLayout>
 
 </LinearLayout>
