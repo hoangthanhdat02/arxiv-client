@@ -5,6 +5,10 @@ import android.graphics.pdf.PdfRenderer;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.view.View;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -25,14 +29,11 @@ public class PdfReaderActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
     private TextView tvReaderTitle;
     private TextView tvPageIndicator;
+    private WebView webPdfViewer;
     private ImageView imgPdfPage;
     private ProgressBar pdfProgressBar;
     private SeekBar seekBarPages;
     private MaterialButton btnDownloadOffline;
-
-    // Not downloaded state
-    private LinearLayout layoutNotDownloaded;
-    private MaterialButton btnCenterDownload;
 
     // Download progress views
     private LinearLayout layoutDownloadProgress;
@@ -42,7 +43,7 @@ public class PdfReaderActivity extends AppCompatActivity {
 
     private PaperItem paper;
     private ArxivDbHelper dbHelper;
-    private int totalPages = 1;
+    private int totalPages = 15;
     private int currentPage = 1;
 
     // Native PDF Renderer
@@ -60,7 +61,7 @@ public class PdfReaderActivity extends AppCompatActivity {
 
         initViews();
         setupToolbar();
-        checkAndLoadPdf();
+        setupPdfViewer();
         setupDownloadButton();
     }
 
@@ -68,13 +69,11 @@ public class PdfReaderActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         tvReaderTitle = findViewById(R.id.tv_reader_title);
         tvPageIndicator = findViewById(R.id.tv_page_indicator);
+        webPdfViewer = findViewById(R.id.web_pdf_viewer);
         imgPdfPage = findViewById(R.id.img_pdf_page);
         pdfProgressBar = findViewById(R.id.pdf_progress_bar);
         seekBarPages = findViewById(R.id.seek_bar_pages);
         btnDownloadOffline = findViewById(R.id.btn_download_offline);
-
-        layoutNotDownloaded = findViewById(R.id.layout_not_downloaded);
-        btnCenterDownload = findViewById(R.id.btn_center_download);
 
         layoutDownloadProgress = findViewById(R.id.layout_download_progress);
         progressBarDownload = findViewById(R.id.progress_bar_download);
@@ -86,16 +85,22 @@ public class PdfReaderActivity extends AppCompatActivity {
             currentPage = dbHelper.getLastReadPage(paper.getId());
         }
 
-        btnCenterDownload.setOnClickListener(v -> startPdfDownload());
+        updatePageIndicator();
 
+        seekBarPages.setMax(totalPages);
+        seekBarPages.setProgress(currentPage);
         seekBarPages.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && paper != null && DownloadService.isPdfDownloaded(PdfReaderActivity.this, paper.getId())) {
+                if (fromUser) {
                     currentPage = Math.max(1, progress);
                     updatePageIndicator();
-                    dbHelper.saveReadProgress(paper.getId(), currentPage);
-                    renderLocalPdfPage(currentPage);
+                    if (paper != null) {
+                        dbHelper.saveReadProgress(paper.getId(), currentPage);
+                    }
+                    if (paper != null && DownloadService.isPdfDownloaded(PdfReaderActivity.this, paper.getId())) {
+                        renderLocalPdfPage(currentPage);
+                    }
                 }
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -107,29 +112,49 @@ public class PdfReaderActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
-    private void checkAndLoadPdf() {
+    private void setupPdfViewer() {
+        WebSettings settings = webPdfViewer.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
+        settings.setSupportZoom(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+
+        webPdfViewer.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                if (newProgress >= 100) {
+                    pdfProgressBar.setVisibility(View.GONE);
+                } else {
+                    pdfProgressBar.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        webPdfViewer.setWebViewClient(new WebViewClient());
+
+        loadPdfContent();
+    }
+
+    private void loadPdfContent() {
         if (paper == null) return;
 
         if (DownloadService.isPdfDownloaded(this, paper.getId())) {
-            layoutNotDownloaded.setVisibility(View.GONE);
-            imgPdfPage.setVisibility(View.VISIBLE);
-            seekBarPages.setEnabled(true);
             renderLocalPdfPage(currentPage);
         } else {
             imgPdfPage.setVisibility(View.GONE);
-            layoutNotDownloaded.setVisibility(View.VISIBLE);
-            seekBarPages.setEnabled(false);
-            tvPageIndicator.setText("Chưa tải");
+            webPdfViewer.setVisibility(View.VISIBLE);
+            String pdfUrl = paper.getPdfUrl();
+            String viewerUrl = "https://docs.google.com/gview?embedded=true&url=" + pdfUrl;
+            webPdfViewer.loadUrl(viewerUrl);
         }
     }
 
     private void renderLocalPdfPage(int pageIndex) {
         if (paper == null) return;
         File pdfFile = DownloadService.getLocalPdfFile(this, paper.getId());
-        if (!pdfFile.exists()) {
-            checkAndLoadPdf();
-            return;
-        }
+        if (!pdfFile.exists()) return;
 
         try {
             if (pdfRenderer == null) {
@@ -146,7 +171,7 @@ public class PdfReaderActivity extends AppCompatActivity {
             int targetIndex = Math.min(Math.max(0, pageIndex - 1), totalPages - 1);
             currentPageObject = pdfRenderer.openPage(targetIndex);
 
-            // Create high-res bitmap for clear rendering
+            // Create bitmap for display
             Bitmap bitmap = Bitmap.createBitmap(
                     currentPageObject.getWidth() * 2,
                     currentPageObject.getHeight() * 2,
@@ -154,17 +179,14 @@ public class PdfReaderActivity extends AppCompatActivity {
             );
             currentPageObject.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
 
+            webPdfViewer.setVisibility(View.GONE);
             pdfProgressBar.setVisibility(View.GONE);
-            layoutNotDownloaded.setVisibility(View.GONE);
             imgPdfPage.setImageBitmap(bitmap);
             imgPdfPage.setVisibility(View.VISIBLE);
 
-            currentPage = pageIndex;
-            seekBarPages.setProgress(currentPage);
             updatePageIndicator();
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Lỗi hiển thị PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -198,7 +220,6 @@ public class PdfReaderActivity extends AppCompatActivity {
     private void startPdfDownload() {
         btnDownloadOffline.setText("Đang tải...");
         btnDownloadOffline.setEnabled(false);
-        btnCenterDownload.setEnabled(false);
 
         layoutDownloadProgress.setVisibility(View.VISIBLE);
         progressBarDownload.setProgress(0);
@@ -218,15 +239,13 @@ public class PdfReaderActivity extends AppCompatActivity {
                 layoutDownloadProgress.setVisibility(View.GONE);
                 btnDownloadOffline.setText("Mở file Offline");
                 btnDownloadOffline.setEnabled(true);
-                btnCenterDownload.setEnabled(true);
 
                 // Save to SQLite DB
                 paper.setLocalPdfPath(downloadedFile.getAbsolutePath());
                 dbHelper.saveBookmark(paper, "Đã tải Offline");
                 dbHelper.updateLocalPdfPath(paper.getId(), downloadedFile.getAbsolutePath());
 
-                // Render offline page directly
-                layoutNotDownloaded.setVisibility(View.GONE);
+                // Render offline page
                 renderLocalPdfPage(1);
 
                 Toast.makeText(PdfReaderActivity.this, "Tải PDF thành công! Đang hiển thị bản Offline.", Toast.LENGTH_LONG).show();
@@ -237,18 +256,13 @@ public class PdfReaderActivity extends AppCompatActivity {
                 layoutDownloadProgress.setVisibility(View.GONE);
                 btnDownloadOffline.setText("Tải PDF về máy");
                 btnDownloadOffline.setEnabled(true);
-                btnCenterDownload.setEnabled(true);
                 Toast.makeText(PdfReaderActivity.this, "Tải thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void updatePageIndicator() {
-        if (DownloadService.isPdfDownloaded(this, paper != null ? paper.getId() : "")) {
-            tvPageIndicator.setText(String.format(java.util.Locale.getDefault(), "Trang %d/%d", currentPage, totalPages));
-        } else {
-            tvPageIndicator.setText("Chưa tải");
-        }
+        tvPageIndicator.setText(String.format(java.util.Locale.getDefault(), "Trang %d/%d", currentPage, totalPages));
     }
 
     private void closePdfRenderer() {
