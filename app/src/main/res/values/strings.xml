@@ -14,6 +14,8 @@
 
     <string name="btn_read_pdf">Đọc PDF</string>
     <string name="btn_download">Tải về</string>
+    <string name="btn_open_offline">Mở file Offline</string>
+    <string name="btn_download_pdf">Tải PDF về máy</string>
     <string name="btn_offline">Đọc Offline</string>
     <string name="btn_copy_bibtex">Sao chép BibTeX</string>
     <string name="btn_share">Chia sẻ</string>

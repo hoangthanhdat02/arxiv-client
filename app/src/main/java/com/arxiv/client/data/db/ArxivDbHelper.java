@@ -5,7 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import com.arxiv.client.data.download.DownloadService;
 import com.arxiv.client.data.model.PaperItem;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -80,15 +82,19 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
 
     // CRUD: Add or update bookmark
     public boolean saveBookmark(PaperItem paper, String note) {
+        if (paper == null) return false;
+        String id = paper.getId();
+        if (id == null || id.trim().isEmpty()) return false;
+
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
-        cv.put(COL_ID, paper.getId());
-        cv.put(COL_TITLE, paper.getTitle());
-        cv.put(COL_SUMMARY, paper.getSummary());
+        cv.put(COL_ID, id);
+        cv.put(COL_TITLE, paper.getTitle() != null ? paper.getTitle() : "");
+        cv.put(COL_SUMMARY, paper.getSummary() != null ? paper.getSummary() : "");
         cv.put(COL_AUTHORS, paper.getAuthorsString());
-        cv.put(COL_PUBLISHED, paper.getPublished());
-        cv.put(COL_CATEGORY, paper.getPrimaryCategory());
-        cv.put(COL_PDF_URL, paper.getPdfUrl());
+        cv.put(COL_PUBLISHED, paper.getPublished() != null ? paper.getPublished() : "");
+        cv.put(COL_CATEGORY, paper.getPrimaryCategory() != null ? paper.getPrimaryCategory() : "");
+        cv.put(COL_PDF_URL, paper.getPdfUrl() != null ? paper.getPdfUrl() : "");
         cv.put(COL_LOCAL_PDF_PATH, paper.getLocalPdfPath());
         cv.put(COL_NOTE, note != null ? note : "");
         cv.put(COL_CREATED_AT, System.currentTimeMillis());
@@ -99,6 +105,7 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
 
     // CRUD: Remove bookmark
     public boolean removeBookmark(String paperId) {
+        if (paperId == null || paperId.trim().isEmpty()) return false;
         SQLiteDatabase db = this.getWritableDatabase();
         int rows = db.delete(TABLE_BOOKMARKS, COL_ID + "=?", new String[]{paperId});
         return rows > 0;
@@ -106,6 +113,7 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
 
     // Check if bookmarked
     public boolean isBookmarked(String paperId) {
+        if (paperId == null || paperId.trim().isEmpty()) return false;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_BOOKMARKS, new String[]{COL_ID}, COL_ID + "=?", new String[]{paperId}, null, null, null);
         boolean exists = (cursor != null && cursor.moveToFirst());
@@ -113,7 +121,42 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
         return exists;
     }
 
-    // Get all bookmarked papers (Offline Mode)
+    // Sync downloaded PDF files from storage into SQLite
+    public void syncDownloadedFiles(Context context) {
+        try {
+            File dir = DownloadService.getPdfDirectory(context);
+            File[] files = dir.listFiles();
+            if (dir.exists() && files != null) {
+                for (File f : files) {
+                    if (f.isFile() && f.getName().endsWith(".pdf")) {
+                        String rawName = f.getName().substring(0, f.getName().length() - 4);
+                        String paperId = rawName.replace("_", "/");
+
+                        if (!isBookmarked(paperId) && !isBookmarked(rawName)) {
+                            PaperItem item = new PaperItem(
+                                    paperId,
+                                    "Bài báo arXiv (" + paperId + ")",
+                                    "Tệp PDF đã tải xuống ngoại tuyến.",
+                                    Arrays.asList("arXiv Author"),
+                                    "",
+                                    "cs.AI",
+                                    "https://arxiv.org/pdf/" + paperId + ".pdf"
+                            );
+                            item.setLocalPdfPath(f.getAbsolutePath());
+                            saveBookmark(item, "Đã tải Offline");
+                        } else {
+                            updateLocalPdfPath(paperId, f.getAbsolutePath());
+                            updateLocalPdfPath(rawName, f.getAbsolutePath());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Get all bookmarked & downloaded papers (Offline Library)
     public List<PaperItem> getAllBookmarks() {
         List<PaperItem> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -146,14 +189,24 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
 
     // Update local PDF path
     public void updateLocalPdfPath(String paperId, String localPath) {
+        if (paperId == null || paperId.trim().isEmpty()) return;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COL_LOCAL_PDF_PATH, localPath);
         db.update(TABLE_BOOKMARKS, cv, COL_ID + "=?", new String[]{paperId});
     }
 
+    // Clear local PDF paths when cache is cleared
+    public void clearAllLocalPdfPaths() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.putNull(COL_LOCAL_PDF_PATH);
+        db.update(TABLE_BOOKMARKS, cv, null, null);
+    }
+
     // History: Save last read page
     public void saveReadProgress(String paperId, int page) {
+        if (paperId == null || paperId.trim().isEmpty()) return;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COL_ID, paperId);
@@ -164,6 +217,7 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
 
     // History: Get last read page
     public int getLastReadPage(String paperId) {
+        if (paperId == null || paperId.trim().isEmpty()) return 1;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_HISTORY, new String[]{COL_LAST_PAGE}, COL_ID + "=?", new String[]{paperId}, null, null, null);
         int page = 1;
