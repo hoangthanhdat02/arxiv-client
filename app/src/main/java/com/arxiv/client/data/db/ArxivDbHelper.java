@@ -121,33 +121,22 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
         return exists;
     }
 
-    // Sync downloaded PDF files from storage into SQLite
+    // Sync downloaded PDF status for existing bookmarks in SQLite
     public void syncDownloadedFiles(Context context) {
         try {
-            File dir = DownloadService.getPdfDirectory(context);
-            File[] files = dir.listFiles();
-            if (dir.exists() && files != null) {
-                for (File f : files) {
-                    if (f.isFile() && f.getName().endsWith(".pdf")) {
-                        String rawName = f.getName().substring(0, f.getName().length() - 4);
-                        String paperId = rawName.replace("_", "/");
+            List<PaperItem> bookmarks = getAllBookmarks();
+            if (bookmarks == null || bookmarks.isEmpty()) return;
 
-                        if (!isBookmarked(paperId) && !isBookmarked(rawName)) {
-                            PaperItem item = new PaperItem(
-                                    paperId,
-                                    "Bài báo arXiv (" + paperId + ")",
-                                    "Tệp PDF đã tải xuống ngoại tuyến.",
-                                    Arrays.asList("arXiv Author"),
-                                    "",
-                                    "cs.AI",
-                                    "https://arxiv.org/pdf/" + paperId + ".pdf"
-                            );
-                            item.setLocalPdfPath(f.getAbsolutePath());
-                            saveBookmark(item, "Đã tải Offline");
-                        } else {
-                            updateLocalPdfPath(paperId, f.getAbsolutePath());
-                            updateLocalPdfPath(rawName, f.getAbsolutePath());
-                        }
+            for (PaperItem paper : bookmarks) {
+                if (paper.getId() == null) continue;
+                File pdfFile = DownloadService.getLocalPdfFile(context, paper.getId());
+                if (pdfFile.exists() && pdfFile.length() > 0) {
+                    if (paper.getLocalPdfPath() == null || !paper.getLocalPdfPath().equals(pdfFile.getAbsolutePath())) {
+                        updateLocalPdfPath(paper.getId(), pdfFile.getAbsolutePath());
+                    }
+                } else {
+                    if (paper.getLocalPdfPath() != null) {
+                        updateLocalPdfPath(paper.getId(), null);
                     }
                 }
             }
@@ -192,7 +181,11 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
         if (paperId == null || paperId.trim().isEmpty()) return;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
-        cv.put(COL_LOCAL_PDF_PATH, localPath);
+        if (localPath != null) {
+            cv.put(COL_LOCAL_PDF_PATH, localPath);
+        } else {
+            cv.putNull(COL_LOCAL_PDF_PATH);
+        }
         db.update(TABLE_BOOKMARKS, cv, COL_ID + "=?", new String[]{paperId});
     }
 

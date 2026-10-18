@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import okhttp3.OkHttpClient;
@@ -45,9 +46,26 @@ public class DownloadService {
         return new File(getPdfDirectory(context), cleanName);
     }
 
+    public static boolean isValidPdfFile(File file) {
+        if (file == null || !file.exists() || file.length() < 4) {
+            return false;
+        }
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] header = new byte[4];
+            int read = fis.read(header);
+            if (read == 4) {
+                // PDF magic number is %PDF (0x25, 0x50, 0x44, 0x46)
+                return header[0] == 0x25 && header[1] == 0x50 && header[2] == 0x44 && header[3] == 0x46;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return false;
+    }
+
     public static boolean isPdfDownloaded(Context context, String paperId) {
         File file = getLocalPdfFile(context, paperId);
-        return file.exists() && file.length() > 0;
+        return file.exists() && file.length() > 0 && isValidPdfFile(file);
     }
 
     public static void downloadPdf(Context context, String pdfUrl, String paperId, DownloadCallback callback) {
@@ -101,6 +119,18 @@ public class DownloadService {
                 fos.flush();
                 fos.close();
                 is.close();
+
+                // Validate downloaded file is a genuine PDF (not HTML error/gateway timeout)
+                if (!isValidPdfFile(targetFile)) {
+                    if (targetFile.exists()) {
+                        boolean deleted = targetFile.delete();
+                        if (!deleted) {
+                            Log.w(TAG, "Không thể xóa file PDF không hợp lệ");
+                        }
+                    }
+                    mainHandler.post(() -> callback.onError("Tệp tải về không phải định dạng PDF hợp lệ (máy chủ có thể trả về lỗi HTML)."));
+                    return;
+                }
 
                 // Show completion notification
                 showDownloadCompleteNotification(context, paperTitle != null ? paperTitle : paperId);

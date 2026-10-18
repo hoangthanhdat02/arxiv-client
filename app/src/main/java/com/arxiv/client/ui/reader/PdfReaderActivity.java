@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.pdf.PdfRenderer;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -143,18 +144,28 @@ public class PdfReaderActivity extends AppCompatActivity {
         if (DownloadService.isPdfDownloaded(this, paper.getId())) {
             renderLocalPdfPage(currentPage);
         } else {
-            imgPdfPage.setVisibility(View.GONE);
-            webPdfViewer.setVisibility(View.VISIBLE);
-            String pdfUrl = paper.getPdfUrl();
-            String viewerUrl = "https://docs.google.com/gview?embedded=true&url=" + pdfUrl;
-            webPdfViewer.loadUrl(viewerUrl);
+            loadOnlineViewer();
         }
+    }
+
+    private void loadOnlineViewer() {
+        if (paper == null) return;
+        imgPdfPage.setVisibility(View.GONE);
+        webPdfViewer.setVisibility(View.VISIBLE);
+        pdfProgressBar.setVisibility(View.VISIBLE);
+        String pdfUrl = paper.getPdfUrl();
+        String viewerUrl = "https://docs.google.com/gview?embedded=true&url=" + pdfUrl;
+        webPdfViewer.loadUrl(viewerUrl);
     }
 
     private void renderLocalPdfPage(int pageIndex) {
         if (paper == null) return;
         File pdfFile = DownloadService.getLocalPdfFile(this, paper.getId());
-        if (!pdfFile.exists()) return;
+        if (!pdfFile.exists() || !DownloadService.isValidPdfFile(pdfFile)) {
+            loadOnlineViewer();
+            updateButtonState();
+            return;
+        }
 
         try {
             if (pdfRenderer == null) {
@@ -171,12 +182,40 @@ public class PdfReaderActivity extends AppCompatActivity {
             int targetIndex = Math.min(Math.max(0, pageIndex - 1), totalPages - 1);
             currentPageObject = pdfRenderer.openPage(targetIndex);
 
-            // Create bitmap for display
-            Bitmap bitmap = Bitmap.createBitmap(
-                    currentPageObject.getWidth() * 2,
-                    currentPageObject.getHeight() * 2,
-                    Bitmap.Config.ARGB_8888
+            // Synchronize current page and seek bar slider
+            currentPage = targetIndex + 1;
+            seekBarPages.setProgress(currentPage);
+
+            // Compute safe display-bounded dimensions to prevent OutOfMemoryError
+            int pageWidth = currentPageObject.getWidth();
+            int pageHeight = currentPageObject.getHeight();
+
+            DisplayMetrics dm = getResources().getDisplayMetrics();
+            int maxBoundWidth = Math.min(Math.max(dm.widthPixels, 720), 2048);
+            int maxBoundHeight = Math.min(Math.max(dm.heightPixels, 1280), 2048);
+
+            // Scale to fit screen/display bounds while preserving aspect ratio
+            float scale = Math.min(
+                    (float) maxBoundWidth / Math.max(1, pageWidth),
+                    (float) maxBoundHeight / Math.max(1, pageHeight)
             );
+            // Cap scale factor to at most 2.0x for standard pages to prevent excessive memory allocation
+            scale = Math.min(scale, 2.0f);
+            if (scale <= 0) scale = 1.0f;
+
+            int bitmapWidth = Math.max(1, Math.round(pageWidth * scale));
+            int bitmapHeight = Math.max(1, Math.round(pageHeight * scale));
+
+            // Create bitmap for display with OutOfMemoryError protection
+            Bitmap bitmap = null;
+            try {
+                bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+            } catch (OutOfMemoryError oom) {
+                // Fallback to RGB_565 or halved dimensions under severe memory pressure
+                System.gc();
+                bitmap = Bitmap.createBitmap(Math.max(1, bitmapWidth / 2), Math.max(1, bitmapHeight / 2), Bitmap.Config.RGB_565);
+            }
+
             currentPageObject.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
 
             webPdfViewer.setVisibility(View.GONE);
@@ -185,8 +224,24 @@ public class PdfReaderActivity extends AppCompatActivity {
             imgPdfPage.setVisibility(View.VISIBLE);
 
             updatePageIndicator();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            t.printStackTrace();
+            closePdfRenderer();
+
+            // Invalidate bad/corrupt file
+            if (pdfFile.exists()) {
+                pdfFile.delete();
+            }
+            if (paper != null) {
+                paper.setLocalPdfPath(null);
+                dbHelper.updateLocalPdfPath(paper.getId(), null);
+            }
+
+            // Restore usable online viewer & retry download action
+            loadOnlineViewer();
+            updateButtonState();
+
+            Toast.makeText(this, "Tệp PDF ngoại tuyến bị lỗi. Đang chuyển sang xem trực tuyến.", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -240,13 +295,16 @@ public class PdfReaderActivity extends AppCompatActivity {
                 btnDownloadOffline.setText("Mở file Offline");
                 btnDownloadOffline.setEnabled(true);
 
-                // Save to SQLite DB
+                // Save / Update in SQLite DB
                 paper.setLocalPdfPath(downloadedFile.getAbsolutePath());
-                dbHelper.saveBookmark(paper, "Đã tải Offline");
-                dbHelper.updateLocalPdfPath(paper.getId(), downloadedFile.getAbsolutePath());
+                if (dbHelper.isBookmarked(paper.getId())) {
+                    dbHelper.updateLocalPdfPath(paper.getId(), downloadedFile.getAbsolutePath());
+                } else {
+                    dbHelper.saveBookmark(paper, "Đã tải Offline");
+                }
 
-                // Render offline page
-                renderLocalPdfPage(1);
+                // Render offline page at current progress
+                renderLocalPdfPage(currentPage);
 
                 Toast.makeText(PdfReaderActivity.this, "Tải PDF thành công! Đang hiển thị bản Offline.", Toast.LENGTH_LONG).show();
             }
