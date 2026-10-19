@@ -5,46 +5,68 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ShareCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.arxiv.client.R;
 import com.arxiv.client.data.api.ApiClient;
 import com.arxiv.client.data.db.ArxivDbHelper;
+import com.arxiv.client.data.download.DownloadService;
 import com.arxiv.client.data.model.BibtexResponse;
 import com.arxiv.client.data.model.PaperItem;
+import com.arxiv.client.databinding.ItemPaperCardBinding;
+import com.arxiv.client.ui.home.PaperDetailBottomSheet;
 import com.arxiv.client.ui.reader.PdfReaderActivity;
-import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * High-performance RecyclerView Adapter for arXiv Paper cards (Member 3 - Leduy36raumaphaduongtau).
+ * Built with ViewBinding, DiffUtil 60fps animations, Material Design 3, and ergonomic touch targets.
+ */
 public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHolder> {
+
+    public interface OnPaperClickListener {
+        void onPaperClick(PaperItem paper);
+    }
 
     private final Context context;
     private final List<PaperItem> papers = new ArrayList<>();
     private final ArxivDbHelper dbHelper;
+    private OnPaperClickListener onPaperClickListener;
 
-    public PaperAdapter(Context context) {
+    public PaperAdapter(@NonNull Context context) {
         this.context = context;
         this.dbHelper = ArxivDbHelper.getInstance(context);
     }
 
-    public void setPapers(List<PaperItem> newPapers) {
-        this.papers.clear();
-        if (newPapers != null) {
-            this.papers.addAll(newPapers);
-        }
-        notifyDataSetChanged();
+    public void setOnPaperClickListener(OnPaperClickListener listener) {
+        this.onPaperClickListener = listener;
     }
 
+    /**
+     * Replaces paper list with granular DiffUtil updates to eliminate jank.
+     */
+    public void setPapers(List<PaperItem> newPapers) {
+        List<PaperItem> oldList = new ArrayList<>(this.papers);
+        List<PaperItem> targetList = (newPapers != null) ? new ArrayList<>(newPapers) : new ArrayList<>();
+
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new PaperDiffCallback(oldList, targetList));
+        this.papers.clear();
+        this.papers.addAll(targetList);
+        diffResult.dispatchUpdatesTo(this);
+    }
+
+    /**
+     * Appends additional pages smoothly for infinite scroll pagination.
+     */
     public void addPapers(List<PaperItem> morePapers) {
         if (morePapers != null && !morePapers.isEmpty()) {
             int start = this.papers.size();
@@ -56,92 +78,15 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
     @NonNull
     @Override
     public PaperViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_paper_card, parent, false);
-        return new PaperViewHolder(view);
+        ItemPaperCardBinding binding = ItemPaperCardBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
+        return new PaperViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull PaperViewHolder holder, int position) {
         PaperItem paper = papers.get(position);
-
-        holder.tvCategory.setText(paper.getPrimaryCategory());
-        holder.tvDate.setText(paper.getFormattedDate());
-        holder.tvTitle.setText(paper.getTitle());
-        holder.tvAuthors.setText(paper.getAuthorsString());
-        holder.tvSummary.setText(paper.getSummary());
-
-        // Check SQLite bookmark status
-        boolean isBookmarked = dbHelper.isBookmarked(paper.getId());
-        holder.btnBookmark.setImageResource(isBookmarked
-                ? android.R.drawable.btn_star_big_on
-                : android.R.drawable.btn_star_big_off);
-
-        // Check offline PDF download status
-        boolean isDownloaded = com.arxiv.client.data.download.DownloadService.isPdfDownloaded(context, paper.getId());
-        holder.btnReadPdf.setText(isDownloaded ? "Mở file Offline" : "Tải PDF về máy");
-
-        // Action: Read PDF in-app
-        View.OnClickListener openPdfListener = v -> {
-            Intent intent = new Intent(context, PdfReaderActivity.class);
-            intent.putExtra("paper", paper);
-            context.startActivity(intent);
-        };
-        holder.btnReadPdf.setOnClickListener(openPdfListener);
-        holder.itemView.setOnClickListener(openPdfListener);
-
-        // Action: Copy BibTeX
-        holder.btnBibtex.setOnClickListener(v -> {
-            Toast.makeText(context, "Đang lấy trích dẫn BibTeX...", Toast.LENGTH_SHORT).show();
-            ApiClient.getApiService().getBibtex(paper.getId()).enqueue(new Callback<BibtexResponse>() {
-                @Override
-                public void onResponse(Call<BibtexResponse> call, Response<BibtexResponse> response) {
-                    String bibtexText = "";
-                    if (response.isSuccessful() && response.body() != null) {
-                        bibtexText = response.body().getBibtex();
-                    } else {
-                        // Fallback format
-                        bibtexText = "@misc{arxiv:" + paper.getId() + ",\n  title={" + paper.getTitle() + "},\n  author={" + paper.getAuthorsString() + "},\n  url={" + paper.getArxivUrl() + "}\n}";
-                    }
-                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("BibTeX Citation", bibtexText);
-                    clipboard.setPrimaryClip(clip);
-                    Toast.makeText(context, "Đã sao chép BibTeX vào Clipboard máy ảo!", Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onFailure(Call<BibtexResponse> call, Throwable t) {
-                    String bibtexText = "@misc{arxiv:" + paper.getId() + ",\n  title={" + paper.getTitle() + "},\n  author={" + paper.getAuthorsString() + "}\n}";
-                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("BibTeX Citation", bibtexText);
-                    clipboard.setPrimaryClip(clip);
-                    Toast.makeText(context, "Đã sao chép BibTeX vào Clipboard!", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-
-        // Action: Bookmark toggle
-        holder.btnBookmark.setOnClickListener(v -> {
-            boolean currentlySaved = dbHelper.isBookmarked(paper.getId());
-            if (currentlySaved) {
-                dbHelper.removeBookmark(paper.getId());
-                holder.btnBookmark.setImageResource(android.R.drawable.btn_star_big_off);
-                Toast.makeText(context, "Đã xóa khỏi Thư viện", Toast.LENGTH_SHORT).show();
-            } else {
-                dbHelper.saveBookmark(paper, "");
-                holder.btnBookmark.setImageResource(android.R.drawable.btn_star_big_on);
-                Toast.makeText(context, "Đã lưu vào Thư viện ngoại tuyến!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Action: Share
-        holder.btnShare.setOnClickListener(v -> {
-            String shareText = paper.getTitle() + "\n" + paper.getArxivUrl();
-            new ShareCompat.IntentBuilder(context)
-                    .setType("text/plain")
-                    .setChooserTitle("Chia sẻ bài báo arXiv")
-                    .setText(shareText)
-                    .startChooser();
-        });
+        holder.bind(paper);
     }
 
     @Override
@@ -149,22 +94,107 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
         return papers.size();
     }
 
-    public static class PaperViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCategory, tvDate, tvTitle, tvAuthors, tvSummary;
-        MaterialButton btnReadPdf, btnBibtex;
-        ImageButton btnBookmark, btnShare;
+    public class PaperViewHolder extends RecyclerView.ViewHolder {
+        private final ItemPaperCardBinding binding;
 
-        public PaperViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvCategory = itemView.findViewById(R.id.tv_category);
-            tvDate = itemView.findViewById(R.id.tv_date);
-            tvTitle = itemView.findViewById(R.id.tv_title);
-            tvAuthors = itemView.findViewById(R.id.tv_authors);
-            tvSummary = itemView.findViewById(R.id.tv_summary);
-            btnReadPdf = itemView.findViewById(R.id.btn_read_pdf);
-            btnBibtex = itemView.findViewById(R.id.btn_bibtex);
-            btnBookmark = itemView.findViewById(R.id.btn_bookmark);
-            btnShare = itemView.findViewById(R.id.btn_share);
+        public PaperViewHolder(@NonNull ItemPaperCardBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
+
+        public void bind(PaperItem paper) {
+            // Category badge & published date
+            binding.tvCategory.setText(paper.getPrimaryCategory());
+            binding.tvDate.setText(paper.getFormattedDate());
+
+            // Core academic info
+            binding.tvTitle.setText(paper.getTitle());
+            binding.tvAuthors.setText(paper.getAuthorsString());
+            binding.tvSummary.setText(paper.getSummary());
+
+            // Synchronize SQLite bookmark state
+            boolean isBookmarked = dbHelper.isBookmarked(paper.getId());
+            binding.btnBookmark.setImageResource(isBookmarked
+                    ? R.drawable.ic_bookmark_filled
+                    : R.drawable.ic_bookmark_border);
+
+            // Synchronize offline PDF download state
+            boolean isDownloaded = DownloadService.isPdfDownloaded(context, paper.getId());
+            binding.btnReadPdf.setText(isDownloaded ? R.string.btn_open_offline : R.string.btn_read_pdf);
+
+            // Card click: Open PaperDetailBottomSheet (or notify listener)
+            binding.getRoot().setOnClickListener(v -> {
+                if (onPaperClickListener != null) {
+                    onPaperClickListener.onPaperClick(paper);
+                } else if (context instanceof FragmentActivity) {
+                    PaperDetailBottomSheet bottomSheet = PaperDetailBottomSheet.newInstance(paper);
+                    bottomSheet.show(((FragmentActivity) context).getSupportFragmentManager(), "PaperDetailBottomSheet");
+                }
+            });
+
+            // Action: Direct Read PDF in Native Reader (TV5 module)
+            binding.btnReadPdf.setOnClickListener(v -> {
+                Intent intent = new Intent(context, PdfReaderActivity.class);
+                intent.putExtra("paper", paper);
+                context.startActivity(intent);
+            });
+
+            // Action: Copy BibTeX citation
+            binding.btnBibtex.setOnClickListener(v -> {
+                Toast.makeText(context, R.string.fetching_bibtex, Toast.LENGTH_SHORT).show();
+                ApiClient.getApiService().getBibtex(paper.getId()).enqueue(new Callback<BibtexResponse>() {
+                    @Override
+                    public void onResponse(Call<BibtexResponse> call, Response<BibtexResponse> response) {
+                        String bibtexText;
+                        if (response.isSuccessful() && response.body() != null && response.body().getBibtex() != null) {
+                            bibtexText = response.body().getBibtex();
+                        } else {
+                            bibtexText = "@misc{arxiv:" + paper.getId() + ",\n  title={" + paper.getTitle() + "},\n  author={" + paper.getAuthorsString() + "},\n  url={" + paper.getArxivUrl() + "}\n}";
+                        }
+                        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                        if (clipboard != null) {
+                            ClipData clip = ClipData.newPlainText("BibTeX Citation", bibtexText);
+                            clipboard.setPrimaryClip(clip);
+                            Toast.makeText(context, R.string.copied_bibtex, Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<BibtexResponse> call, Throwable t) {
+                        String bibtexText = "@misc{arxiv:" + paper.getId() + ",\n  title={" + paper.getTitle() + "},\n  author={" + paper.getAuthorsString() + "}\n}";
+                        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                        if (clipboard != null) {
+                            ClipData clip = ClipData.newPlainText("BibTeX Citation", bibtexText);
+                            clipboard.setPrimaryClip(clip);
+                            Toast.makeText(context, R.string.copied_bibtex, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            });
+
+            // Action: Toggle Bookmark in SQLite
+            binding.btnBookmark.setOnClickListener(v -> {
+                boolean currentlySaved = dbHelper.isBookmarked(paper.getId());
+                if (currentlySaved) {
+                    dbHelper.removeBookmark(paper.getId());
+                    binding.btnBookmark.setImageResource(R.drawable.ic_bookmark_border);
+                    Toast.makeText(context, R.string.bookmark_removed, Toast.LENGTH_SHORT).show();
+                } else {
+                    dbHelper.saveBookmark(paper, "");
+                    binding.btnBookmark.setImageResource(R.drawable.ic_bookmark_filled);
+                    Toast.makeText(context, R.string.bookmark_saved, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            // Action: Share paper link via Android Native Share Sheet
+            binding.btnShare.setOnClickListener(v -> {
+                String shareText = paper.getTitle() + "\n" + paper.getArxivUrl();
+                new ShareCompat.IntentBuilder(context)
+                        .setType("text/plain")
+                        .setChooserTitle(context.getString(R.string.share_title))
+                        .setText(shareText)
+                        .startChooser();
+            });
         }
     }
 }
