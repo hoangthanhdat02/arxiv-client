@@ -135,8 +135,9 @@ public class HomeFragment extends Fragment {
     private void cancelCurrentCall() {
         if (currentCall != null && !currentCall.isCanceled()) {
             currentCall.cancel();
-            currentCall = null;
         }
+        currentCall = null;
+        isLoading = false;
     }
 
     private void loadPapers(boolean showShimmer) {
@@ -238,6 +239,9 @@ public class HomeFragment extends Fragment {
             binding.layoutError.setVisibility(View.VISIBLE);
             binding.layoutEmpty.setVisibility(View.GONE);
         } else {
+            binding.recyclerPapers.setVisibility(View.VISIBLE);
+            binding.layoutError.setVisibility(View.GONE);
+            binding.layoutEmpty.setVisibility(View.GONE);
             Toast.makeText(getContext(), R.string.error_network_title, Toast.LENGTH_SHORT).show();
         }
     }

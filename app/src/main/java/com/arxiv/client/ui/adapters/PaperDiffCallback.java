@@ -46,6 +46,7 @@ public class PaperDiffCallback extends DiffUtil.Callback {
         if (oldItem == null || newItem == null) return false;
 
         return Objects.equals(oldItem.getTitle(), newItem.getTitle())
+                && Objects.equals(oldItem.getAuthors(), newItem.getAuthors())
                 && Objects.equals(oldItem.getSummary(), newItem.getSummary())
                 && Objects.equals(oldItem.getPrimaryCategory(), newItem.getPrimaryCategory())
                 && Objects.equals(oldItem.getPublished(), newItem.getPublished())

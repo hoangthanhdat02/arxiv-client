@@ -83,10 +83,9 @@
     <!-- Scrollable Abstract Text -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="220dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        android:maxHeight="220dp">
+        android:layout_marginBottom="16dp">
 
         <TextView
             android:id="@+id/tv_detail_abstract"
