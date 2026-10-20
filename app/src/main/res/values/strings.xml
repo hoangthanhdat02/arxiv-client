@@ -5,24 +5,39 @@
     <string name="nav_library">Đã lưu</string>
     <string name="nav_settings">Cài đặt</string>
 
-    <string name="feed_title_ai">Trí tuệ Nhân tạo (cs.AI)</string>
-    <string name="feed_title_lg">Học máy (cs.LG)</string>
+    <string name="feed_title_ai">Artificial Intelligence (cs.AI)</string>
+    <string name="feed_title_lg">Machine Learning (cs.LG)</string>
     <string name="search_hint">Tìm bài báo, tác giả, mô hình...</string>
     <string name="empty_search">Không tìm thấy bài báo phù hợp</string>
     <string name="empty_library">Chưa có bài báo nào được lưu</string>
     <string name="empty_library_hint">Lưu bài báo để đọc offline ngay cả khi ngắt mạng (Airplane Mode)</string>
 
-    <string name="btn_read_pdf">Đọc PDF</string>
-    <string name="btn_download">Tải về</string>
-    <string name="btn_open_offline">Mở file Offline</string>
-    <string name="btn_download_pdf">Tải PDF về máy</string>
-    <string name="btn_offline">Đọc Offline</string>
-    <string name="btn_copy_bibtex">Sao chép BibTeX</string>
-    <string name="btn_share">Chia sẻ</string>
+    <string name="btn_read_pdf">Read PDF</string>
+    <string name="btn_download">Download</string>
+    <string name="btn_open_offline">Open Offline</string>
+    <string name="btn_download_pdf">Download PDF</string>
+    <string name="btn_offline">Read Offline</string>
+    <string name="btn_copy_bibtex">Copy BibTeX</string>
+    <string name="btn_share">Share</string>
 
     <string name="settings_theme">Chế độ tối (Dark Mode)</string>
     <string name="settings_storage">Bộ nhớ cache đã dùng</string>
     <string name="settings_clear_cache">Dọn dẹp bộ nhớ</string>
     <string name="settings_about">Đồ án môn Phát triển Ứng dụng Di động - Topic 28</string>
     <string name="credit_arxiv">Dữ liệu bài báo mở được cung cấp bởi kho lưu trữ mở arXiv.org</string>
+
+    <string name="btn_retry">Retry</string>
+    <string name="error_network_title">Cannot connect to ExpressJS Backend</string>
+    <string name="error_network_hint">Please check network connection or verify that ExpressJS server is running on port 3001 (10.0.2.2:3001)</string>
+    <string name="paper_detail_title">Paper Details</string>
+    <string name="paper_detail_abstract">Abstract</string>
+    <string name="paper_detail_authors">Authors</string>
+    <string name="paper_detail_categories">Categories</string>
+    <string name="paper_detail_published">Published Date</string>
+    <string name="loading_more">Loading more papers...</string>
+    <string name="copied_bibtex">BibTeX citation copied to clipboard!</string>
+    <string name="fetching_bibtex">Fetching BibTeX citation...</string>
+    <string name="bookmark_saved">Saved to offline library!</string>
+    <string name="bookmark_removed">Removed from library</string>
+    <string name="share_title">Share arXiv Paper</string>
 </resources>

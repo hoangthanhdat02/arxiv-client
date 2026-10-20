@@ -10,67 +10,83 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.arxiv.client.R;
 import com.arxiv.client.data.api.ApiClient;
 import com.arxiv.client.data.model.PaperItem;
 import com.arxiv.client.data.model.PaperResponse;
+import com.arxiv.client.databinding.FragmentHomeBinding;
 import com.arxiv.client.ui.adapters.PaperAdapter;
-import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.tabs.TabLayout;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Home Feed & Discover Module for Latest arXiv Research Papers (Member 3 - Leduy36raumaphaduongtau).
+ *
+ * Core Features:
+ * 1. Comprehensive ViewBinding architecture eliminating findViewById.
+ * 2. Real-time category filtering (cs.AI vs cs.LG) with automatic request cancellation to prevent Race Conditions.
+ * 3. Smooth Shimmer Skeleton loading on cold start.
+ * 4. Pull-to-refresh (SwipeRefreshLayout) synchronized with the arXiv Express Gateway.
+ * 5. High-performance infinite scroll pagination with prefetching.
+ * 6. State Machine: Shimmer Loading -> Content List -> Error State with Retry Button.
+ */
 public class HomeFragment extends Fragment {
 
-    private TabLayout tabCategory;
-    private SwipeRefreshLayout swipeRefresh;
-    private RecyclerView recyclerPapers;
-    private ShimmerFrameLayout shimmerView;
+    private static final int PAGE_LIMIT = 10;
+
+    private FragmentHomeBinding binding;
     private PaperAdapter paperAdapter;
 
     private String currentCategory = "cs.AI";
     private int currentPage = 0;
     private boolean isLoading = false;
+    private boolean hasMorePages = true;
+
+    // Track active network request to safely cancel when switching categories
+    private Call<PaperResponse> currentCall;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
 
-        tabCategory = view.findViewById(R.id.tab_category);
-        swipeRefresh = view.findViewById(R.id.swipe_refresh);
-        recyclerPapers = view.findViewById(R.id.recycler_papers);
-        shimmerView = view.findViewById(R.id.shimmer_view_container);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         setupRecyclerView();
         setupTabs();
         setupSwipeRefresh();
+        setupRetryButton();
 
+        // Initial load with Shimmer skeleton
         loadPapers(true);
-
-        return view;
     }
 
     private void setupRecyclerView() {
         paperAdapter = new PaperAdapter(requireContext());
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
-        recyclerPapers.setLayoutManager(layoutManager);
-        recyclerPapers.setAdapter(paperAdapter);
+        binding.recyclerPapers.setLayoutManager(layoutManager);
+        binding.recyclerPapers.setAdapter(paperAdapter);
 
-        // Infinite scroll pagination
-        recyclerPapers.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        // Infinite scroll pagination listener (60fps optimized)
+        binding.recyclerPapers.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (dy > 0) { // Scrolling down
+                if (dy > 0 && !isLoading && hasMorePages) {
                     int visibleItemCount = layoutManager.getChildCount();
                     int totalItemCount = layoutManager.getItemCount();
-                    int pastVisibleItems = layoutManager.findFirstVisibleItemPosition();
+                    int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
 
-                    if (!isLoading && (visibleItemCount + pastVisibleItems) >= totalItemCount - 2) {
+                    // Trigger next page when 2 items away from bottom
+                    if ((visibleItemCount + firstVisiblePosition) >= totalItemCount - 2
+                            && firstVisiblePosition >= 0) {
                         loadMorePapers();
                     }
                 }
@@ -79,24 +95,49 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupTabs() {
-        tabCategory.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        binding.tabCategory.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                // Cancel any pending network call to prevent race condition
+                cancelCurrentCall();
+
                 currentCategory = (tab.getPosition() == 0) ? "cs.AI" : "cs.LG";
                 currentPage = 0;
+                hasMorePages = true;
+
                 loadPapers(true);
             }
+
             @Override public void onTabUnselected(TabLayout.Tab tab) {}
             @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
 
     private void setupSwipeRefresh() {
-        swipeRefresh.setColorSchemeResources(R.color.primary);
-        swipeRefresh.setOnRefreshListener(() -> {
+        binding.swipeRefresh.setColorSchemeResources(R.color.primary);
+        binding.swipeRefresh.setOnRefreshListener(() -> {
+            cancelCurrentCall();
             currentPage = 0;
+            hasMorePages = true;
             loadPapers(false);
         });
+    }
+
+    private void setupRetryButton() {
+        binding.btnRetry.setOnClickListener(v -> {
+            cancelCurrentCall();
+            currentPage = 0;
+            hasMorePages = true;
+            loadPapers(true);
+        });
+    }
+
+    private void cancelCurrentCall() {
+        if (currentCall != null && !currentCall.isCanceled()) {
+            currentCall.cancel();
+        }
+        currentCall = null;
+        isLoading = false;
     }
 
     private void loadPapers(boolean showShimmer) {
@@ -104,60 +145,111 @@ public class HomeFragment extends Fragment {
         isLoading = true;
 
         if (showShimmer) {
-            shimmerView.setVisibility(View.VISIBLE);
-            shimmerView.startShimmer();
-            recyclerPapers.setVisibility(View.GONE);
+            binding.shimmerViewContainer.setVisibility(View.VISIBLE);
+            binding.shimmerViewContainer.startShimmer();
+            binding.recyclerPapers.setVisibility(View.GONE);
+            binding.layoutError.setVisibility(View.GONE);
+            binding.layoutEmpty.setVisibility(View.GONE);
         }
 
-        ApiClient.getApiService().getPapers(currentCategory, currentPage, 10).enqueue(new Callback<PaperResponse>() {
+        currentCall = ApiClient.getApiService().getPapers(currentCategory, currentPage, PAGE_LIMIT);
+        currentCall.enqueue(new Callback<PaperResponse>() {
             @Override
             public void onResponse(Call<PaperResponse> call, Response<PaperResponse> response) {
+                if (!isAdded()) return;
                 isLoading = false;
-                swipeRefresh.setRefreshing(false);
-                shimmerView.stopShimmer();
-                shimmerView.setVisibility(View.GONE);
-                recyclerPapers.setVisibility(View.VISIBLE);
+                binding.swipeRefresh.setRefreshing(false);
+                binding.shimmerViewContainer.stopShimmer();
+                binding.shimmerViewContainer.setVisibility(View.GONE);
 
                 if (response.isSuccessful() && response.body() != null) {
                     List<PaperItem> papers = response.body().getData();
-                    paperAdapter.setPapers(papers);
+                    if (papers == null || papers.isEmpty()) {
+                        hasMorePages = false;
+                        binding.recyclerPapers.setVisibility(View.GONE);
+                        binding.layoutEmpty.setVisibility(View.VISIBLE);
+                        binding.layoutError.setVisibility(View.GONE);
+                    } else {
+                        binding.recyclerPapers.setVisibility(View.VISIBLE);
+                        binding.layoutEmpty.setVisibility(View.GONE);
+                        binding.layoutError.setVisibility(View.GONE);
+
+                        paperAdapter.setPapers(papers);
+
+                        if (papers.size() < PAGE_LIMIT) {
+                            hasMorePages = false;
+                        }
+                    }
                 } else {
-                    Toast.makeText(getContext(), "Không thể kết nối máy chủ ExpressJS (10.0.2.2:3001)", Toast.LENGTH_SHORT).show();
+                    showErrorState();
                 }
             }
 
             @Override
             public void onFailure(Call<PaperResponse> call, Throwable t) {
+                if (call.isCanceled() || !isAdded()) return;
                 isLoading = false;
-                swipeRefresh.setRefreshing(false);
-                shimmerView.stopShimmer();
-                shimmerView.setVisibility(View.GONE);
-                recyclerPapers.setVisibility(View.VISIBLE);
-                Toast.makeText(getContext(), "Lỗi mạng: Đang chạy ở chế độ cục bộ hoặc máy chủ tắt", Toast.LENGTH_SHORT).show();
+                binding.swipeRefresh.setRefreshing(false);
+                binding.shimmerViewContainer.stopShimmer();
+                binding.shimmerViewContainer.setVisibility(View.GONE);
+
+                showErrorState();
             }
         });
     }
 
     private void loadMorePapers() {
+        if (isLoading || !hasMorePages) return;
         isLoading = true;
-        currentPage++;
+        int nextPage = currentPage + 1;
 
-        ApiClient.getApiService().getPapers(currentCategory, currentPage, 10).enqueue(new Callback<PaperResponse>() {
+        currentCall = ApiClient.getApiService().getPapers(currentCategory, nextPage, PAGE_LIMIT);
+        currentCall.enqueue(new Callback<PaperResponse>() {
             @Override
             public void onResponse(Call<PaperResponse> call, Response<PaperResponse> response) {
+                if (!isAdded()) return;
                 isLoading = false;
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<PaperItem> morePapers = response.body().getData();
                     if (morePapers != null && !morePapers.isEmpty()) {
+                        currentPage = nextPage;
                         paperAdapter.addPapers(morePapers);
+
+                        if (morePapers.size() < PAGE_LIMIT) {
+                            hasMorePages = false;
+                        }
+                    } else {
+                        hasMorePages = false;
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<PaperResponse> call, Throwable t) {
+                if (call.isCanceled() || !isAdded()) return;
                 isLoading = false;
             }
         });
+    }
+
+    private void showErrorState() {
+        if (paperAdapter.getItemCount() == 0) {
+            binding.recyclerPapers.setVisibility(View.GONE);
+            binding.layoutError.setVisibility(View.VISIBLE);
+            binding.layoutEmpty.setVisibility(View.GONE);
+        } else {
+            binding.recyclerPapers.setVisibility(View.VISIBLE);
+            binding.layoutError.setVisibility(View.GONE);
+            binding.layoutEmpty.setVisibility(View.GONE);
+            Toast.makeText(getContext(), R.string.error_network_title, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        cancelCurrentCall();
+        super.onDestroyView();
+        binding = null;
     }
 }
