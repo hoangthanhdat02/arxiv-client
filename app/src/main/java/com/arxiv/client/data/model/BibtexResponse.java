@@ -15,6 +15,9 @@ public class BibtexResponse {
     @SerializedName("year")
     private int year;
 
+    @SerializedName("doi")
+    private String doi;
+
     @SerializedName("bibtex")
     private String bibtex;
 
@@ -25,6 +28,7 @@ public class BibtexResponse {
     public String getPaperId() { return paperId; }
     public String getTitle() { return title; }
     public int getYear() { return year; }
+    public String getDoi() { return doi; }
     public String getBibtex() { return bibtex; }
     public String getApa() { return apa; }
 }

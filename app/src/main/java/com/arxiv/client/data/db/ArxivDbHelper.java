@@ -13,7 +13,7 @@ import java.util.List;
 public class ArxivDbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "arxiv_client.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Table: Bookmarks
     public static final String TABLE_BOOKMARKS = "bookmarks";
@@ -26,6 +26,8 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
     public static final String COL_PDF_URL = "pdf_url";
     public static final String COL_LOCAL_PDF_PATH = "local_pdf_path";
     public static final String COL_NOTE = "note";
+    public static final String COL_BIBTEX = "bibtex";
+    public static final String COL_APA = "apa";
     public static final String COL_CREATED_AT = "created_at";
 
     // Table: Read History
@@ -58,6 +60,8 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
                 + COL_PDF_URL + " TEXT, "
                 + COL_LOCAL_PDF_PATH + " TEXT, "
                 + COL_NOTE + " TEXT, "
+                + COL_BIBTEX + " TEXT, "
+                + COL_APA + " TEXT, "
                 + COL_CREATED_AT + " INTEGER"
                 + ")";
 
@@ -73,12 +77,17 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKMARKS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_HISTORY);
-        onCreate(db);
+        if (oldVersion < 2) {
+            try {
+                db.execSQL("ALTER TABLE " + TABLE_BOOKMARKS + " ADD COLUMN " + COL_BIBTEX + " TEXT");
+            } catch (Exception ignored) {}
+            try {
+                db.execSQL("ALTER TABLE " + TABLE_BOOKMARKS + " ADD COLUMN " + COL_APA + " TEXT");
+            } catch (Exception ignored) {}
+        }
     }
 
-    // CRUD: Add or update bookmark
+    // CRUD: Add or update bookmark with BibTeX & APA offline persistence
     public boolean saveBookmark(PaperItem paper, String note) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -90,7 +99,20 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
         cv.put(COL_CATEGORY, paper.getPrimaryCategory());
         cv.put(COL_PDF_URL, paper.getPdfUrl());
         cv.put(COL_LOCAL_PDF_PATH, paper.getLocalPdfPath());
-        cv.put(COL_NOTE, note != null ? note : "");
+
+        String finalNote = (note != null && !note.isEmpty()) ? note : paper.getNote();
+        cv.put(COL_NOTE, finalNote != null ? finalNote : "");
+
+        String finalBibtex = (paper.getBibtex() != null && !paper.getBibtex().isEmpty())
+                ? paper.getBibtex()
+                : paper.generateDefaultBibtex();
+        cv.put(COL_BIBTEX, finalBibtex);
+
+        String finalApa = (paper.getApa() != null && !paper.getApa().isEmpty())
+                ? paper.getApa()
+                : paper.generateDefaultApa();
+        cv.put(COL_APA, finalApa);
+
         cv.put(COL_CREATED_AT, System.currentTimeMillis());
 
         long result = db.insertWithOnConflict(TABLE_BOOKMARKS, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
@@ -104,6 +126,51 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
         return rows > 0;
     }
 
+    // CRUD: Update personal research note
+    public boolean updateNote(String paperId, String note) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COL_NOTE, note != null ? note : "");
+        int rows = db.update(TABLE_BOOKMARKS, cv, COL_ID + "=?", new String[]{paperId});
+        return rows > 0;
+    }
+
+    // CRUD: Replace locally generated citation with the server-generated one
+    public boolean updateCitation(String paperId, String bibtex, String apa) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        if (bibtex != null && !bibtex.isEmpty()) cv.put(COL_BIBTEX, bibtex);
+        if (apa != null && !apa.isEmpty()) cv.put(COL_APA, apa);
+        if (cv.size() == 0) return false;
+        int rows = db.update(TABLE_BOOKMARKS, cv, COL_ID + "=?", new String[]{paperId});
+        return rows > 0;
+    }
+
+    // Query: Get personal research note
+    public String getNote(String paperId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String note = "";
+        try (Cursor cursor = db.query(TABLE_BOOKMARKS, new String[]{COL_NOTE}, COL_ID + "=?", new String[]{paperId}, null, null, null)) {
+            if (cursor.moveToFirst()) {
+                note = cursor.getString(cursor.getColumnIndexOrThrow(COL_NOTE));
+            }
+        }
+        return note != null ? note : "";
+    }
+
+    // Query: Get stored BibTeX string (Instant Offline Copy)
+    public String getBibtex(String paperId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String bib = "";
+        try (Cursor cursor = db.query(TABLE_BOOKMARKS, new String[]{COL_BIBTEX}, COL_ID + "=?", new String[]{paperId}, null, null, null)) {
+            if (cursor.moveToFirst()) {
+                int idx = cursor.getColumnIndex(COL_BIBTEX);
+                if (idx != -1) bib = cursor.getString(idx);
+            }
+        }
+        return bib != null ? bib : "";
+    }
+
     // Check if bookmarked
     public boolean isBookmarked(String paperId) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -115,31 +182,53 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
 
     // Get all bookmarked papers (Offline Mode)
     public List<PaperItem> getAllBookmarks() {
+        return getBookmarksByCategory("ALL");
+    }
+
+    // Get bookmarks filtered by category (cs.AI, cs.LG, or ALL)
+    public List<PaperItem> getBookmarksByCategory(String category) {
         List<PaperItem> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_BOOKMARKS, null, null, null, null, null, COL_CREATED_AT + " DESC");
 
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                String id = cursor.getString(cursor.getColumnIndexOrThrow(COL_ID));
-                String title = cursor.getString(cursor.getColumnIndexOrThrow(COL_TITLE));
-                String summary = cursor.getString(cursor.getColumnIndexOrThrow(COL_SUMMARY));
-                String authorsStr = cursor.getString(cursor.getColumnIndexOrThrow(COL_AUTHORS));
-                String published = cursor.getString(cursor.getColumnIndexOrThrow(COL_PUBLISHED));
-                String category = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY));
-                String pdfUrl = cursor.getString(cursor.getColumnIndexOrThrow(COL_PDF_URL));
-                String localPath = cursor.getString(cursor.getColumnIndexOrThrow(COL_LOCAL_PDF_PATH));
+        String selection = null;
+        String[] selectionArgs = null;
+        if (category != null && !category.equalsIgnoreCase("ALL") && !category.isEmpty()) {
+            selection = COL_CATEGORY + "=?";
+            selectionArgs = new String[]{category};
+        }
 
-                List<String> authors = (authorsStr != null && !authorsStr.isEmpty())
-                        ? Arrays.asList(authorsStr.split(", "))
-                        : new ArrayList<>();
+        try (Cursor cursor = db.query(TABLE_BOOKMARKS, null, selection, selectionArgs, null, null, COL_CREATED_AT + " DESC")) {
+            if (cursor.moveToFirst()) {
+                do {
+                    String id = cursor.getString(cursor.getColumnIndexOrThrow(COL_ID));
+                    String title = cursor.getString(cursor.getColumnIndexOrThrow(COL_TITLE));
+                    String summary = cursor.getString(cursor.getColumnIndexOrThrow(COL_SUMMARY));
+                    String authorsStr = cursor.getString(cursor.getColumnIndexOrThrow(COL_AUTHORS));
+                    String published = cursor.getString(cursor.getColumnIndexOrThrow(COL_PUBLISHED));
+                    String cat = cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY));
+                    String pdfUrl = cursor.getString(cursor.getColumnIndexOrThrow(COL_PDF_URL));
+                    String localPath = cursor.getString(cursor.getColumnIndexOrThrow(COL_LOCAL_PDF_PATH));
 
-                PaperItem item = new PaperItem(id, title, summary, authors, published, category, pdfUrl);
-                item.setBookmarked(true);
-                item.setLocalPdfPath(localPath);
-                list.add(item);
-            } while (cursor.moveToNext());
-            cursor.close();
+                    List<String> authors = (authorsStr != null && !authorsStr.isEmpty())
+                            ? Arrays.asList(authorsStr.split(", "))
+                            : new ArrayList<>();
+
+                    PaperItem item = new PaperItem(id, title, summary, authors, published, cat, pdfUrl);
+                    item.setBookmarked(true);
+                    item.setLocalPdfPath(localPath);
+
+                    int noteIdx = cursor.getColumnIndex(COL_NOTE);
+                    if (noteIdx != -1) item.setNote(cursor.getString(noteIdx));
+
+                    int bibtexIdx = cursor.getColumnIndex(COL_BIBTEX);
+                    if (bibtexIdx != -1) item.setBibtex(cursor.getString(bibtexIdx));
+
+                    int apaIdx = cursor.getColumnIndex(COL_APA);
+                    if (apaIdx != -1) item.setApa(cursor.getString(apaIdx));
+
+                    list.add(item);
+                } while (cursor.moveToNext());
+            }
         }
         return list;
     }
@@ -165,11 +254,11 @@ public class ArxivDbHelper extends SQLiteOpenHelper {
     // History: Get last read page
     public int getLastReadPage(String paperId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_HISTORY, new String[]{COL_LAST_PAGE}, COL_ID + "=?", new String[]{paperId}, null, null, null);
         int page = 1;
-        if (cursor != null && cursor.moveToFirst()) {
-            page = cursor.getInt(cursor.getColumnIndexOrThrow(COL_LAST_PAGE));
-            cursor.close();
+        try (Cursor cursor = db.query(TABLE_HISTORY, new String[]{COL_LAST_PAGE}, COL_ID + "=?", new String[]{paperId}, null, null, null)) {
+            if (cursor.moveToFirst()) {
+                page = cursor.getInt(cursor.getColumnIndexOrThrow(COL_LAST_PAGE));
+            }
         }
         return page;
     }
