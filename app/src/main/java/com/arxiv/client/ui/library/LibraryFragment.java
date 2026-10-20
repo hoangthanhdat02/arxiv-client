@@ -81,8 +81,8 @@ public class LibraryFragment extends Fragment {
             }
 
             @Override
-            public void onNoteClicked(PaperItem paper, int position) {
-                paperAdapter.showEditNoteDialog(paper, position);
+            public void onNoteSaved(PaperItem paper, int position) {
+                // Adapter already persisted the note and refreshed the card
             }
         });
     }
@@ -137,6 +137,10 @@ public class LibraryFragment extends Fragment {
     }
 
     private void loadSavedBookmarks() {
+        if (!isAdded()) return;
+        // Sync any downloaded PDF files on disk into database
+        dbHelper.syncDownloadedFiles(requireContext());
+
         List<PaperItem> savedPapers = dbHelper.getBookmarksByCategory(currentCategory);
         paperAdapter.setPapers(savedPapers);
         updateEmptyState();
