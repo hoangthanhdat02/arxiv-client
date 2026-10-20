@@ -89,6 +89,38 @@
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="13sp" />
 
+        <!-- Personal Note Container -->
+        <LinearLayout
+            android:id="@+id/layout_note_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/badge_bg"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="6dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@android:drawable/ic_menu_edit"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:id="@+id/tv_paper_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Ghi chú..."
+                android:textColor="@color/primary_variant"
+                android:textSize="12sp"
+                android:textStyle="italic" />
+        </LinearLayout>
+
         <!-- Action Row (Ergonomic Touch Targets) -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -133,6 +165,18 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1" />
+
+            <!-- Note Button -->
+            <ImageButton
+                android:id="@+id/btn_note"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="Ghi chú"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@android:drawable/ic_menu_edit"
+                app:tint="?android:attr/textColorSecondary" />
 
             <!-- Bookmark Button (48dp Touch Target) -->
             <ImageButton

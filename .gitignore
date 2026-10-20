@@ -11,3 +11,7 @@ local.properties
 app/build
 .env*
 !.env.example
+
+# JVM crash logs
+hs_err_pid*.log
+replay_pid*.log

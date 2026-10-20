@@ -37,7 +37,7 @@
     <string name="loading_more">Loading more papers...</string>
     <string name="copied_bibtex">BibTeX citation copied to clipboard!</string>
     <string name="fetching_bibtex">Fetching BibTeX citation...</string>
-    <string name="bookmark_saved">Saved to offline library!</string>
-    <string name="bookmark_removed">Removed from library</string>
+    <string name="bookmark_saved">Saved</string>
+    <string name="bookmark_removed">Removed</string>
     <string name="share_title">Share arXiv Paper</string>
 </resources>

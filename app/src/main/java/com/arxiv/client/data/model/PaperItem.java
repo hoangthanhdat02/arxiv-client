@@ -37,6 +37,9 @@ public class PaperItem implements Serializable {
 
     private boolean isBookmarked = false;
     private String localPdfPath = null;
+    private String note = "";
+    private String bibtex = "";
+    private String apa = "";
 
     public PaperItem() {}
 
@@ -96,4 +99,47 @@ public class PaperItem implements Serializable {
 
     public String getLocalPdfPath() { return localPdfPath; }
     public void setLocalPdfPath(String localPdfPath) { this.localPdfPath = localPdfPath; }
+
+    public String getNote() { return note != null ? note : ""; }
+    public void setNote(String note) { this.note = note != null ? note : ""; }
+
+    public String getBibtex() { return bibtex != null ? bibtex : ""; }
+    public void setBibtex(String bibtex) { this.bibtex = bibtex != null ? bibtex : ""; }
+
+    public String getApa() { return apa != null ? apa : ""; }
+    public void setApa(String apa) { this.apa = apa != null ? apa : ""; }
+
+    public String generateDefaultBibtex() {
+        if (bibtex != null && !bibtex.trim().isEmpty()) {
+            return bibtex;
+        }
+        String cleanId = getId().replaceAll("[^a-zA-Z0-9._-]", "");
+        String year = "2024";
+        String formatted = getFormattedDate();
+        if (formatted.length() >= 4) {
+            year = formatted.substring(0, 4);
+        }
+        String authorsFormatted = getAuthorsString().replace(", ", " and ");
+        return "@misc{arxiv:" + cleanId + ",\n"
+                + "  title = {" + getTitle() + "},\n"
+                + "  author = {" + authorsFormatted + "},\n"
+                + "  year = {" + year + "},\n"
+                + "  eprint = {" + getId() + "},\n"
+                + "  archivePrefix = {arXiv},\n"
+                + "  primaryClass = {" + getPrimaryCategory() + "},\n"
+                + "  url = {" + getArxivUrl() + "}\n"
+                + "}";
+    }
+
+    public String generateDefaultApa() {
+        if (apa != null && !apa.trim().isEmpty()) {
+            return apa;
+        }
+        String year = "2024";
+        String formatted = getFormattedDate();
+        if (formatted.length() >= 4) {
+            year = formatted.substring(0, 4);
+        }
+        return getAuthorsString() + " (" + year + "). " + getTitle() + ". arXiv preprint arXiv:" + getId() + ". " + getArxivUrl();
+    }
 }

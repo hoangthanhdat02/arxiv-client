@@ -50,6 +50,7 @@ public class PaperDiffCallback extends DiffUtil.Callback {
                 && Objects.equals(oldItem.getSummary(), newItem.getSummary())
                 && Objects.equals(oldItem.getPrimaryCategory(), newItem.getPrimaryCategory())
                 && Objects.equals(oldItem.getPublished(), newItem.getPublished())
-                && oldItem.isBookmarked() == newItem.isBookmarked();
+                && oldItem.isBookmarked() == newItem.isBookmarked()
+                && Objects.equals(oldItem.getNote(), newItem.getNote());
     }
 }
