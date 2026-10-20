@@ -20,6 +20,8 @@ import com.arxiv.client.data.model.BibtexResponse;
 import com.arxiv.client.data.model.PaperItem;
 import com.arxiv.client.ui.reader.PdfReaderActivity;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Call;
@@ -28,13 +30,27 @@ import retrofit2.Response;
 
 public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHolder> {
 
+    public interface OnPaperActionListener {
+        void onBookmarkToggled(PaperItem paper, boolean isSaved, int position);
+        void onNoteClicked(PaperItem paper, int position);
+    }
+
     private final Context context;
     private final List<PaperItem> papers = new ArrayList<>();
     private final ArxivDbHelper dbHelper;
+    private OnPaperActionListener actionListener;
 
     public PaperAdapter(Context context) {
         this.context = context;
         this.dbHelper = ArxivDbHelper.getInstance(context);
+    }
+
+    public void setOnPaperActionListener(OnPaperActionListener listener) {
+        this.actionListener = listener;
+    }
+
+    public List<PaperItem> getPapers() {
+        return papers;
     }
 
     public void setPapers(List<PaperItem> newPapers) {
@@ -51,6 +67,73 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
             this.papers.addAll(morePapers);
             notifyItemRangeInserted(start, morePapers.size());
         }
+    }
+
+    public void removePaperAt(int position) {
+        if (position >= 0 && position < papers.size()) {
+            papers.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    public void insertPaperAt(int position, PaperItem paper) {
+        if (paper != null && position >= 0 && position <= papers.size()) {
+            papers.add(position, paper);
+            notifyItemInserted(position);
+        }
+    }
+
+    public void updatePaperAt(int position, PaperItem paper) {
+        if (paper != null && position >= 0 && position < papers.size()) {
+            papers.set(position, paper);
+            notifyItemChanged(position);
+        }
+    }
+
+    public void showEditNoteDialog(PaperItem paper, int position) {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_note, null);
+        TextView tvPaperName = dialogView.findViewById(R.id.tv_dialog_paper_name);
+        TextInputEditText etNote = dialogView.findViewById(R.id.et_paper_note);
+
+        tvPaperName.setText(paper.getTitle());
+        String currentNote = (paper.getNote() != null && !paper.getNote().isEmpty())
+                ? paper.getNote()
+                : dbHelper.getNote(paper.getId());
+        etNote.setText(currentNote);
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setPositiveButton("Lưu ghi chú", (dialog, which) -> {
+                    String updatedNote = etNote.getText() != null ? etNote.getText().toString().trim() : "";
+                    paper.setNote(updatedNote);
+                    if (dbHelper.isBookmarked(paper.getId())) {
+                        dbHelper.updateNote(paper.getId(), updatedNote);
+                    } else {
+                        // Tự động lưu vào SQLite bookmark để ghi chú không bị mất
+                        paper.setBookmarked(true);
+                        dbHelper.saveBookmark(paper, updatedNote);
+                    }
+                    notifyItemChanged(position);
+                    Toast.makeText(context, "Đã lưu ghi chú nghiên cứu!", Toast.LENGTH_SHORT).show();
+                    if (actionListener != null) {
+                        actionListener.onNoteClicked(paper, position);
+                    }
+                })
+                .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+
+        if (currentNote != null && !currentNote.trim().isEmpty()) {
+            builder.setNeutralButton("Xóa ghi chú", (dialog, which) -> {
+                paper.setNote("");
+                dbHelper.updateNote(paper.getId(), "");
+                notifyItemChanged(position);
+                Toast.makeText(context, "Đã xóa ghi chú", Toast.LENGTH_SHORT).show();
+                if (actionListener != null) {
+                    actionListener.onNoteClicked(paper, position);
+                }
+            });
+        }
+
+        builder.show();
     }
 
     @NonNull
@@ -70,8 +153,34 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
         holder.tvAuthors.setText(paper.getAuthorsString());
         holder.tvSummary.setText(paper.getSummary());
 
+        // Kiểm tra xem bài báo đã có ghi chú lưu trong SQLite chưa
+        if (paper.getNote() == null || paper.getNote().isEmpty()) {
+            String savedNote = dbHelper.getNote(paper.getId());
+            if (savedNote != null && !savedNote.isEmpty()) {
+                paper.setNote(savedNote);
+            }
+        }
+
+        // Hiển thị ghi chú cá nhân
+        if (paper.getNote() != null && !paper.getNote().trim().isEmpty()) {
+            holder.layoutNoteContainer.setVisibility(View.VISIBLE);
+            holder.tvPaperNote.setText(paper.getNote());
+        } else {
+            holder.layoutNoteContainer.setVisibility(View.GONE);
+        }
+
+        // Action: Bấm nút Ghi chú (Hoạt động trên MỌI màn hình: Home, Search, Library)
+        View.OnClickListener noteClickListener = v -> {
+            showEditNoteDialog(paper, holder.getAdapterPosition());
+        };
+        if (holder.btnNote != null) {
+            holder.btnNote.setOnClickListener(noteClickListener);
+        }
+        holder.layoutNoteContainer.setOnClickListener(noteClickListener);
+
         // Check SQLite bookmark status
         boolean isBookmarked = dbHelper.isBookmarked(paper.getId());
+        paper.setBookmarked(isBookmarked);
         holder.btnBookmark.setImageResource(isBookmarked
                 ? android.R.drawable.btn_star_big_on
                 : android.R.drawable.btn_star_big_off);
@@ -85,31 +194,38 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
         holder.btnReadPdf.setOnClickListener(openPdfListener);
         holder.itemView.setOnClickListener(openPdfListener);
 
-        // Action: Copy BibTeX
+        // Action: Copy BibTeX (Offline-First Priority for Airplane Mode)
         holder.btnBibtex.setOnClickListener(v -> {
+            // Check SQLite first for instant offline copy
+            String localBibtex = paper.getBibtex();
+            if (localBibtex == null || localBibtex.trim().isEmpty()) {
+                localBibtex = dbHelper.getBibtex(paper.getId());
+            }
+
+            if (localBibtex != null && !localBibtex.trim().isEmpty()) {
+                copyToClipboard("BibTeX Citation", localBibtex);
+                Toast.makeText(context, "Đã sao chép BibTeX vào Clipboard máy ảo!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Fallback: If not cached in SQLite yet, request API with local fallback
             Toast.makeText(context, "Đang lấy trích dẫn BibTeX...", Toast.LENGTH_SHORT).show();
             ApiClient.getApiService().getBibtex(paper.getId()).enqueue(new Callback<BibtexResponse>() {
                 @Override
                 public void onResponse(Call<BibtexResponse> call, Response<BibtexResponse> response) {
-                    String bibtexText = "";
-                    if (response.isSuccessful() && response.body() != null) {
-                        bibtexText = response.body().getBibtex();
-                    } else {
-                        // Fallback format
-                        bibtexText = "@misc{arxiv:" + paper.getId() + ",\n  title={" + paper.getTitle() + "},\n  author={" + paper.getAuthorsString() + "},\n  url={" + paper.getArxivUrl() + "}\n}";
+                    if (response.isSuccessful()) {
+                        applyServerCitation(paper, response.body());
                     }
-                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("BibTeX Citation", bibtexText);
-                    clipboard.setPrimaryClip(clip);
+                    String bibtexText = paper.generateDefaultBibtex();
+
+                    copyToClipboard("BibTeX Citation", bibtexText);
                     Toast.makeText(context, "Đã sao chép BibTeX vào Clipboard máy ảo!", Toast.LENGTH_LONG).show();
                 }
 
                 @Override
                 public void onFailure(Call<BibtexResponse> call, Throwable t) {
-                    String bibtexText = "@misc{arxiv:" + paper.getId() + ",\n  title={" + paper.getTitle() + "},\n  author={" + paper.getAuthorsString() + "}\n}";
-                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("BibTeX Citation", bibtexText);
-                    clipboard.setPrimaryClip(clip);
+                    String bibtexText = paper.generateDefaultBibtex();
+                    copyToClipboard("BibTeX Citation", bibtexText);
                     Toast.makeText(context, "Đã sao chép BibTeX vào Clipboard!", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -117,27 +233,76 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
 
         // Action: Bookmark toggle
         holder.btnBookmark.setOnClickListener(v -> {
+            int currentPos = holder.getAdapterPosition();
             boolean currentlySaved = dbHelper.isBookmarked(paper.getId());
             if (currentlySaved) {
                 dbHelper.removeBookmark(paper.getId());
+                paper.setBookmarked(false);
                 holder.btnBookmark.setImageResource(android.R.drawable.btn_star_big_off);
-                Toast.makeText(context, "Đã xóa khỏi Thư viện", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Removed", Toast.LENGTH_SHORT).show();
+                if (actionListener != null) {
+                    actionListener.onBookmarkToggled(paper, false, currentPos);
+                }
             } else {
-                dbHelper.saveBookmark(paper, "");
+                dbHelper.saveBookmark(paper, paper.getNote());
+                paper.setBookmarked(true);
+                syncServerCitation(paper);
                 holder.btnBookmark.setImageResource(android.R.drawable.btn_star_big_on);
-                Toast.makeText(context, "Đã lưu vào Thư viện ngoại tuyến!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
+                if (actionListener != null) {
+                    actionListener.onBookmarkToggled(paper, true, currentPos);
+                }
             }
         });
 
         // Action: Share
         holder.btnShare.setOnClickListener(v -> {
-            String shareText = paper.getTitle() + "\n" + paper.getArxivUrl();
+            String shareText = paper.getTitle() + "\n"
+                    + paper.getAuthorsString() + "\n\n"
+                    + "arXiv: " + paper.getArxivUrl() + "\n"
+                    + "PDF: " + paper.getPdfUrl();
             new ShareCompat.IntentBuilder(context)
                     .setType("text/plain")
                     .setChooserTitle("Chia sẻ bài báo arXiv")
+                    .setSubject(paper.getTitle())
                     .setText(shareText)
                     .startChooser();
         });
+    }
+
+    // Silently replace the locally generated citation of a freshly saved bookmark with the server one,
+    // so the next copy in Airplane Mode returns the server-quality BibTeX (with DOI)
+    private void syncServerCitation(PaperItem paper) {
+        ApiClient.getApiService().getBibtex(paper.getId()).enqueue(new Callback<BibtexResponse>() {
+            @Override
+            public void onResponse(Call<BibtexResponse> call, Response<BibtexResponse> response) {
+                if (response.isSuccessful()) {
+                    applyServerCitation(paper, response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BibtexResponse> call, Throwable t) {
+                // Offline: keep the locally generated citation
+            }
+        });
+    }
+
+    private void applyServerCitation(PaperItem paper, BibtexResponse body) {
+        if (body == null || body.getBibtex() == null || body.getBibtex().isEmpty()) return;
+        paper.setBibtex(body.getBibtex());
+        paper.setApa(body.getApa());
+        if (dbHelper.isBookmarked(paper.getId())) {
+            dbHelper.updateCitation(paper.getId(), body.getBibtex(), body.getApa());
+        }
+    }
+
+    private void copyToClipboard(String label, String text) {
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard != null) {
+            ClipData clip = ClipData.newPlainText(label, text);
+            clipboard.setPrimaryClip(clip);
+        }
     }
 
     @Override
@@ -146,9 +311,10 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
     }
 
     public static class PaperViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCategory, tvDate, tvTitle, tvAuthors, tvSummary;
+        TextView tvCategory, tvDate, tvTitle, tvAuthors, tvSummary, tvPaperNote;
+        View layoutNoteContainer;
         MaterialButton btnReadPdf, btnBibtex;
-        ImageButton btnBookmark, btnShare;
+        ImageButton btnBookmark, btnShare, btnNote;
 
         public PaperViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -157,10 +323,14 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
             tvTitle = itemView.findViewById(R.id.tv_title);
             tvAuthors = itemView.findViewById(R.id.tv_authors);
             tvSummary = itemView.findViewById(R.id.tv_summary);
+            tvPaperNote = itemView.findViewById(R.id.tv_paper_note);
+            layoutNoteContainer = itemView.findViewById(R.id.layout_note_container);
+
             btnReadPdf = itemView.findViewById(R.id.btn_read_pdf);
             btnBibtex = itemView.findViewById(R.id.btn_bibtex);
             btnBookmark = itemView.findViewById(R.id.btn_bookmark);
             btnShare = itemView.findViewById(R.id.btn_share);
+            btnNote = itemView.findViewById(R.id.btn_note);
         }
     }
 }
