@@ -110,7 +110,17 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             int selectedNavId = savedInstanceState.getInt(KEY_SELECTED_NAV, R.id.nav_home);
-            bottomNavigation.setSelectedItemId(selectedNavId);
+            Fragment restoredFragment;
+            if (selectedNavId == R.id.nav_search) {
+                restoredFragment = searchFragment;
+            } else if (selectedNavId == R.id.nav_library) {
+                restoredFragment = libraryFragment;
+            } else if (selectedNavId == R.id.nav_settings) {
+                restoredFragment = settingsFragment;
+            } else {
+                restoredFragment = homeFragment;
+            }
+            switchFragment(restoredFragment);
         }
     }
 
@@ -133,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
             ft.show(targetFragment);
         }
 
-        ft.commit();
+        ft.commitAllowingStateLoss();
         activeFragment = targetFragment;
     }
 

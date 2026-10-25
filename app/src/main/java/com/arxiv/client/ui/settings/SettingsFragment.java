@@ -38,11 +38,9 @@ public class SettingsFragment extends Fragment {
 
         // Dark mode setup
         boolean isDarkMode = prefs.getBoolean("dark_mode", false);
-        switchDarkMode.setOnCheckedChangeListener(null);
         switchDarkMode.setChecked(isDarkMode);
 
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (!buttonView.isPressed()) return;
             boolean currentlySaved = prefs.getBoolean("dark_mode", false);
             if (isChecked != currentlySaved) {
                 prefs.edit().putBoolean("dark_mode", isChecked).apply();
@@ -51,6 +49,11 @@ public class SettingsFragment extends Fragment {
                         : AppCompatDelegate.MODE_NIGHT_NO);
             }
         });
+
+        View cardDarkMode = view.findViewById(R.id.card_dark_mode);
+        if (cardDarkMode != null) {
+            cardDarkMode.setOnClickListener(v -> switchDarkMode.toggle());
+        }
 
         // Cache size display
         updateCacheSizeText();
