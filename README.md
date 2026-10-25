@@ -109,7 +109,7 @@ app/src/main/java/com/arxiv/client/
 Before launching the Android application, start the backend server:
 ```bash
 cd arxiv-backend
-npm start
+npm run dev
 ```
 *(Confirms running at `http://localhost:3001` and accessible to emulator via `http://10.0.2.2:3001`).*
 

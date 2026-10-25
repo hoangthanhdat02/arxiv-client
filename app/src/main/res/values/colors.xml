@@ -1,24 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#B31B1B</color> <!-- arXiv Academic Crimson -->
-    <color name="primary_variant">#8A1212</color>
-    <color name="secondary">#0284C7</color>
-    <color name="secondary_variant">#0369A1</color>
+    <!-- arXiv Academic Vibrant Crimson Red (Matching Mockup) -->
+    <color name="primary">#D32F2F</color>
+    <color name="primary_variant">#B71C1C</color>
+    <color name="primary_light">#FFEBEE</color>
+    <color name="primary_border">#FFCDD2</color>
+
+    <!-- Academic Author Blue Link Color -->
+    <color name="secondary">#1565C0</color>
+    <color name="secondary_variant">#0D47A1</color>
+    <color name="author_blue">#1565C0</color>
     
-    <color name="background_light">#F8FAFC</color>
+    <!-- Light Theme Surfaces -->
+    <color name="background_light">#F8F9FA</color>
     <color name="surface_light">#FFFFFF</color>
-    <color name="text_primary_light">#0F172A</color>
-    <color name="text_secondary_light">#64748B</color>
-    <color name="border_light">#E2E8F0</color>
+    <color name="text_primary_light">#1A1A1A</color>
+    <color name="text_secondary_light">#757575</color>
+    <color name="border_light">#EEEEEE</color>
+    <color name="chip_unselected_bg">#F1F3F5</color>
+    <color name="chip_unselected_text">#495057</color>
 
-    <color name="background_dark">#0F172A</color>
-    <color name="surface_dark">#1E293B</color>
-    <color name="text_primary_dark">#F8FAFC</color>
-    <color name="text_secondary_dark">#94A3B8</color>
-    <color name="border_dark">#334155</color>
+    <!-- Dark Theme Surfaces -->
+    <color name="background_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="text_primary_dark">#F8F9FA</color>
+    <color name="text_secondary_dark">#9E9E9E</color>
+    <color name="border_dark">#2C2C2C</color>
 
-    <color name="badge_ai">#DC2626</color>
-    <color name="badge_lg">#2563EB</color>
-    <color name="badge_bg">#FEE2E2</color>
+    <!-- Badges & Accents -->
+    <color name="badge_ai">#D32F2F</color>
+    <color name="badge_lg">#D32F2F</color>
+    <color name="badge_bg">#FFEBEE</color>
     <color name="shimmer_color">#E0E0E0</color>
 </resources>

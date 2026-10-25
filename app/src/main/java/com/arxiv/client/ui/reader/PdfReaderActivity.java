@@ -229,7 +229,7 @@ public class PdfReaderActivity extends AppCompatActivity {
 
     private void fetchPaperByIdFromApi(String paperId) {
         pdfProgressBar.setVisibility(View.VISIBLE);
-        tvReaderTitle.setText("Đang tải dữ liệu bài báo từ ExpressJS Gateway (10.0.2.2:3001)...");
+        tvReaderTitle.setText("Loading paper data from ExpressJS Gateway (10.0.2.2:3001)...");
 
         String url = ApiClient.DEFAULT_BASE_URL + "papers/" + paperId;
         Request request = new Request.Builder()
@@ -242,7 +242,7 @@ public class PdfReaderActivity extends AppCompatActivity {
             public void onFailure(Call call, IOException e) {
                 runOnUiThread(() -> {
                     pdfProgressBar.setVisibility(View.GONE);
-                    showError("Không thể kết nối máy chủ ExpressJS Gateway:\n" + e.getMessage() + "\n(Vui lòng kiểm tra backend đang chạy ở port 3001)");
+                    showError("Cannot connect to ExpressJS Gateway server:\n" + e.getMessage() + "\n(Please verify backend server is running on port 3001)");
                 });
             }
 
@@ -251,7 +251,7 @@ public class PdfReaderActivity extends AppCompatActivity {
                 if (!response.isSuccessful() || response.body() == null) {
                     runOnUiThread(() -> {
                         pdfProgressBar.setVisibility(View.GONE);
-                        showError("Máy chủ ExpressJS trả về lỗi HTTP: " + response.code());
+                        showError("ExpressJS server returned HTTP error: " + response.code());
                     });
                     return;
                 }
@@ -267,10 +267,10 @@ public class PdfReaderActivity extends AppCompatActivity {
                             onPaperLoaded();
                         });
                     } else {
-                        runOnUiThread(() -> showError("Không tìm thấy bài báo với mã ID: " + paperId));
+                        runOnUiThread(() -> showError("Paper not found with ID: " + paperId));
                     }
                 } catch (Exception ex) {
-                    runOnUiThread(() -> showError("Lỗi bóc tách JSON bài báo: " + ex.getMessage()));
+                    runOnUiThread(() -> showError("Error parsing paper JSON: " + ex.getMessage()));
                 }
             }
         });
@@ -278,7 +278,7 @@ public class PdfReaderActivity extends AppCompatActivity {
 
     private void fetchLatestPaperFromApi() {
         pdfProgressBar.setVisibility(View.VISIBLE);
-        tvReaderTitle.setText("Đang lấy bài báo mới nhất từ máy chủ arXiv qua Gateway...");
+        tvReaderTitle.setText("Fetching latest paper from arXiv via Gateway...");
 
         ApiClient.getApiService().getPapers("cs.AI", 0, 1).enqueue(new retrofit2.Callback<PaperResponse>() {
             @Override
@@ -288,14 +288,14 @@ public class PdfReaderActivity extends AppCompatActivity {
                     onPaperLoaded();
                 } else {
                     pdfProgressBar.setVisibility(View.GONE);
-                    showError("Không nhận được dữ liệu bài báo từ ExpressJS Gateway (10.0.2.2:3001).");
+                    showError("No paper data received from ExpressJS Gateway (10.0.2.2:3001).");
                 }
             }
 
             @Override
             public void onFailure(retrofit2.Call<PaperResponse> call, Throwable t) {
                 pdfProgressBar.setVisibility(View.GONE);
-                showError("Lỗi kết nối ExpressJS Gateway:\n" + t.getMessage());
+                showError("ExpressJS Gateway connection error:\n" + t.getMessage());
             }
         });
     }
@@ -309,11 +309,11 @@ public class PdfReaderActivity extends AppCompatActivity {
 
     private void fetchAndCopyBibtexFromApi() {
         if (paper == null || paper.getId().isEmpty()) {
-            Toast.makeText(this, "Chưa có thông tin bài báo để lấy BibTeX", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No paper information available for BibTeX", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Toast.makeText(this, "Đang lấy trích dẫn BibTeX từ Backend Gateway...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Fetching BibTeX citation from Backend Gateway...", Toast.LENGTH_SHORT).show();
 
         ApiClient.getApiService().getBibtex(paper.getId()).enqueue(new retrofit2.Callback<BibtexResponse>() {
             @Override
@@ -329,7 +329,7 @@ public class PdfReaderActivity extends AppCompatActivity {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("BibTeX Citation", bibtexText);
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(PdfReaderActivity.this, "Đã sao chép BibTeX vào Clipboard máy ảo!", Toast.LENGTH_LONG).show();
+                Toast.makeText(PdfReaderActivity.this, "BibTeX citation copied to clipboard!", Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -338,7 +338,7 @@ public class PdfReaderActivity extends AppCompatActivity {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("BibTeX Citation", fallback);
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(PdfReaderActivity.this, "Đã sao chép BibTeX (fallback) vào Clipboard!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(PdfReaderActivity.this, "BibTeX citation (fallback) copied to clipboard!", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -484,13 +484,13 @@ public class PdfReaderActivity extends AppCompatActivity {
 
         if (delta > 0 && currentPage >= totalPages) {
             imgPdfPage.animate().translationX(0f).setDuration(150).start();
-            Toast.makeText(this, "Đang ở trang cuối cùng", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You are on the last page", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (delta < 0 && currentPage <= 1) {
             imgPdfPage.animate().translationX(0f).setDuration(150).start();
-            Toast.makeText(this, "Đang ở trang đầu tiên", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You are on the first page", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -666,7 +666,7 @@ public class PdfReaderActivity extends AppCompatActivity {
         btnDownloadOffline.setOnClickListener(v -> {
             if (paper == null) return;
             if (DownloadService.isPdfDownloaded(this, paper.getId())) {
-                Toast.makeText(this, "Bài báo đã được lưu offline an toàn trong máy ảo.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Paper is already saved for offline reading.", Toast.LENGTH_SHORT).show();
             } else {
                 startAutoDownloadAndOpen(paper.getPdfUrl(), paper.getId());
             }
@@ -676,20 +676,20 @@ public class PdfReaderActivity extends AppCompatActivity {
     }
 
     private void updatePageIndicator() {
-        tvPageIndicator.setText(String.format(Locale.getDefault(), "Trang %d/%d", currentPage, totalPages));
+        tvPageIndicator.setText(String.format(Locale.getDefault(), "Page %d/%d", currentPage, totalPages));
     }
 
     private void updateButtonState() {
         if (paper == null) return;
         boolean downloaded = DownloadService.isPdfDownloaded(this, paper.getId());
         if (downloaded) {
-            btnDownloadOffline.setText("Đã lưu Offline");
+            btnDownloadOffline.setText("Saved Offline");
             btnDownloadOffline.setEnabled(true);
         } else if (isDownloading) {
-            btnDownloadOffline.setText("Đang tải...");
+            btnDownloadOffline.setText("Downloading...");
             btnDownloadOffline.setEnabled(false);
         } else {
-            btnDownloadOffline.setText("Tải PDF về máy");
+            btnDownloadOffline.setText("Download PDF");
             btnDownloadOffline.setEnabled(true);
         }
     }
@@ -700,7 +700,7 @@ public class PdfReaderActivity extends AppCompatActivity {
 
     private void resolveAndLoadPdf() {
         if (paper == null) {
-            showError("Không tìm thấy thông tin bài báo arXiv.");
+            showError("Paper information not found.");
             return;
         }
 
@@ -725,7 +725,7 @@ public class PdfReaderActivity extends AppCompatActivity {
         layoutDownloadProgress.setVisibility(View.VISIBLE);
         progressBarDownload.setProgress(0);
         tvDownloadPercent.setText("0%");
-        tvDownloadStatus.setText("Đang tải PDF về máy để mở qua PdfRenderer...");
+        tvDownloadStatus.setText("Downloading PDF to open in native reader...");
         pdfProgressBar.setVisibility(View.VISIBLE);
         imgPdfPage.setVisibility(View.GONE);
         layoutPdfError.setVisibility(View.GONE);
@@ -737,7 +737,7 @@ public class PdfReaderActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     progressBarDownload.setProgress(progressPercent);
                     tvDownloadPercent.setText(progressPercent + "%");
-                    btnDownloadOffline.setText("Đang tải " + progressPercent + "%");
+                    btnDownloadOffline.setText("Downloading " + progressPercent + "%");
                 });
             }
 
@@ -756,7 +756,7 @@ public class PdfReaderActivity extends AppCompatActivity {
 
                     openPdfFile(downloadedFile);
                     updateButtonState();
-                    Toast.makeText(PdfReaderActivity.this, "Đã tải xong! Đang hiển thị bản Native PdfRenderer.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PdfReaderActivity.this, "Download complete! Opening in native reader.", Toast.LENGTH_SHORT).show();
                 });
             }
 
@@ -767,7 +767,7 @@ public class PdfReaderActivity extends AppCompatActivity {
                     layoutDownloadProgress.setVisibility(View.GONE);
                     pdfProgressBar.setVisibility(View.GONE);
                     updateButtonState();
-                    showError("Không thể tải tệp PDF:\n" + errorMessage + "\n(Vui lòng kiểm tra mạng hoặc thử lại)");
+                    showError("Failed to download PDF:\n" + errorMessage + "\n(Please check network connection or retry)");
                 });
             }
         });
@@ -793,7 +793,7 @@ public class PdfReaderActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
                 closePdfRendererSync();
-                runOnUiThread(() -> showError("Không thể khởi tạo PdfRenderer từ tệp tin:\n" + e.getMessage()));
+                runOnUiThread(() -> showError("Cannot initialize PdfRenderer from file:\n" + e.getMessage()));
             }
         });
     }
@@ -839,7 +839,7 @@ public class PdfReaderActivity extends AppCompatActivity {
                         triggerPrefetch(targetPage);
                     } else {
                         pdfProgressBar.setVisibility(View.GONE);
-                        showError("Không thể kết xuất trang " + targetPage);
+                        showError("Unable to render page " + targetPage);
                     }
                 });
             }

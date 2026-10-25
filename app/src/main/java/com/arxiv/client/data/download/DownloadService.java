@@ -35,7 +35,7 @@ public class DownloadService {
         if (!dir.exists()) {
             boolean created = dir.mkdirs();
             if (!created) {
-                Log.w(TAG, "Không thể tạo thư mục arXiv PDFs");
+                Log.w(TAG, "Cannot create arXiv PDFs directory");
             }
         }
         return dir;
@@ -91,7 +91,7 @@ public class DownloadService {
 
                 ResponseBody responseBody = response.body();
                 if (responseBody == null) {
-                    mainHandler.post(() -> callback.onError("Phản hồi rỗng từ máy chủ"));
+                    mainHandler.post(() -> callback.onError("Empty response from server"));
                     return;
                 }
 
@@ -125,10 +125,10 @@ public class DownloadService {
                     if (targetFile.exists()) {
                         boolean deleted = targetFile.delete();
                         if (!deleted) {
-                            Log.w(TAG, "Không thể xóa file PDF không hợp lệ");
+                            Log.w(TAG, "Cannot delete invalid PDF file");
                         }
                     }
-                    mainHandler.post(() -> callback.onError("Tệp tải về không phải định dạng PDF hợp lệ (máy chủ có thể trả về lỗi HTML)."));
+                    mainHandler.post(() -> callback.onError("Downloaded file is not a valid PDF format (server may have returned HTML error)."));
                     return;
                 }
 
@@ -140,7 +140,7 @@ public class DownloadService {
                 if (targetFile.exists()) {
                     boolean deleted = targetFile.delete();
                     if (!deleted) {
-                        Log.w(TAG, "Không thể xóa file tạm");
+                        Log.w(TAG, "Cannot delete temporary file");
                     }
                 }
                 mainHandler.post(() -> callback.onError(e.getMessage()));
@@ -156,22 +156,22 @@ public class DownloadService {
 
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
-                    "Tải xuống PDF arXiv",
+                    "arXiv PDF Downloads",
                     NotificationManager.IMPORTANCE_DEFAULT
             );
-            channel.setDescription("Thông báo khi hoàn tất tải PDF bài báo");
+            channel.setDescription("Notifications for completed arXiv PDF downloads");
             notificationManager.createNotificationChannel(channel);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setSmallIcon(android.R.drawable.stat_sys_download_done)
-                    .setContentTitle("Tải file PDF thành công")
-                    .setContentText("Đã lưu bài báo vào bộ nhớ an toàn: " + titleText)
+                    .setContentTitle("PDF Download Completed")
+                    .setContentText("Saved paper for offline reading: " + titleText)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setAutoCancel(true);
 
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
         } catch (Exception e) {
-            Log.e(TAG, "Lỗi khi hiển thị thông báo tải file PDF", e);
+            Log.e(TAG, "Error displaying PDF download notification", e);
         }
     }
 
@@ -197,7 +197,7 @@ public class DownloadService {
                 if (f.isFile()) {
                     boolean deleted = f.delete();
                     if (!deleted) {
-                        Log.w(TAG, "Không thể xóa file: " + f.getName());
+                        Log.w(TAG, "Cannot delete file: " + f.getName());
                     }
                 }
             }

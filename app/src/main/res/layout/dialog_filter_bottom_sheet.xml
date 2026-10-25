@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?android:attr/colorBackground"
     android:orientation="vertical"
     android:padding="20dp">
 
@@ -12,12 +13,12 @@
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"
-        android:background="@color/border_light" />
+        android:background="@drawable/tab_pill_container" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bộ Lọc Tìm Kiếm"
+        android:text="@string/filter_title"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -27,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Chuyên mục arXiv:"
+        android:text="@string/filter_category_label"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp"
         android:textStyle="bold" />
@@ -37,8 +38,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        app:singleSelection="true"
-        app:selectionRequired="true">
+        app:selectionRequired="true"
+        app:singleSelection="true">
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_all"
@@ -46,21 +47,36 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Tất cả (AI &amp; LG)" />
+            android:text="@string/filter_category_all"
+            android:textColor="@color/chip_text_selector"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/chip_background_selector"
+            app:chipCornerRadius="20dp"
+            app:chipStrokeWidth="0dp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_ai"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="cs.AI (Trí tuệ nhân tạo)" />
+            android:text="cs.AI (Artificial Intelligence)"
+            android:textColor="@color/chip_text_selector"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/chip_background_selector"
+            app:chipCornerRadius="20dp"
+            app:chipStrokeWidth="0dp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_lg"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="cs.LG (Học máy)" />
+            android:text="cs.LG (Machine Learning)"
+            android:textColor="@color/chip_text_selector"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/chip_background_selector"
+            app:chipCornerRadius="20dp"
+            app:chipStrokeWidth="0dp" />
     </com.google.android.material.chip.ChipGroup>
 
     <!-- Sort By -->
@@ -68,7 +84,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Sắp xếp kết quả theo:"
+        android:text="@string/filter_sort_label"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp"
         android:textStyle="bold" />
@@ -83,14 +99,18 @@
             android:id="@+id/radio_relevance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:buttonTint="@color/primary"
             android:checked="true"
-            android:text="Độ liên quan cao nhất" />
+            android:text="@string/filter_sort_relevance"
+            android:textColor="?android:attr/textColorPrimary" />
 
         <RadioButton
             android:id="@+id/radio_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mới nhất (Ngày công bố)" />
+            android:buttonTint="@color/primary"
+            android:text="@string/filter_sort_date"
+            android:textColor="?android:attr/textColorPrimary" />
     </RadioGroup>
 
     <!-- Action Buttons Row -->
@@ -98,26 +118,41 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:orientation="horizontal"
-        android:gravity="end">
+        android:gravity="center"
+        android:orientation="horizontal">
 
-        <!-- Reset filters to default -->
+        <!-- Reset filters button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_reset_filter"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
             android:layout_height="48dp"
-            android:text="Đặt lại"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="@string/btn_reset"
+            android:textColor="@color/primary"
+            android:textSize="13sp"
+            app:cornerRadius="8dp"
+            app:icon="@drawable/ic_reset_circle"
+            app:iconGravity="textStart"
+            app:iconTint="@color/primary"
+            app:strokeColor="@color/primary" />
 
         <!-- Apply button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_apply_filter"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="48dp"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="Áp dụng bộ lọc"
-            app:cornerRadius="8dp" />
+            android:text="@string/btn_apply"
+            android:textSize="13sp"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="8dp"
+            app:icon="@drawable/ic_filter_funnel"
+            app:iconGravity="textStart"
+            app:iconTint="@android:color/white" />
     </LinearLayout>
 
 </LinearLayout>

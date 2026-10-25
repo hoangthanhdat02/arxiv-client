@@ -5,11 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.arxiv.client.R;
 import com.arxiv.client.data.api.ApiClient;
 import com.arxiv.client.data.model.PaperItem;
@@ -17,21 +19,16 @@ import com.arxiv.client.data.model.PaperResponse;
 import com.arxiv.client.databinding.FragmentHomeBinding;
 import com.arxiv.client.ui.adapters.PaperAdapter;
 import com.google.android.material.tabs.TabLayout;
+
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Home Feed & Discover Module for Latest arXiv Research Papers (Member 3 - Leduy36raumaphaduongtau).
- *
- * Core Features:
- * 1. Comprehensive ViewBinding architecture eliminating findViewById.
- * 2. Real-time category filtering (cs.AI vs cs.LG) with automatic request cancellation to prevent Race Conditions.
- * 3. Smooth Shimmer Skeleton loading on cold start.
- * 4. Pull-to-refresh (SwipeRefreshLayout) synchronized with the arXiv Express Gateway.
- * 5. High-performance infinite scroll pagination with prefetching.
- * 6. State Machine: Shimmer Loading -> Content List -> Error State with Retry Button.
+ * Home feed module displaying featured academic paper hero card and category feeds.
+ * Implements cs.AI and cs.LG tabs, pagination, Shimmer skeleton, and paper details.
  */
 public class HomeFragment extends Fragment {
 
@@ -98,7 +95,7 @@ public class HomeFragment extends Fragment {
         binding.tabCategory.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                // Cancel any pending network call to prevent race condition
+                // Cancel any pending network call to prevent race conditions
                 cancelCurrentCall();
 
                 currentCategory = (tab.getPosition() == 0) ? "cs.AI" : "cs.LG";
@@ -148,6 +145,9 @@ public class HomeFragment extends Fragment {
             binding.shimmerViewContainer.setVisibility(View.VISIBLE);
             binding.shimmerViewContainer.startShimmer();
             binding.recyclerPapers.setVisibility(View.GONE);
+            if (binding.cardFeatured != null) {
+                binding.cardFeatured.getRoot().setVisibility(View.GONE);
+            }
             binding.layoutError.setVisibility(View.GONE);
             binding.layoutEmpty.setVisibility(View.GONE);
         }
@@ -167,12 +167,19 @@ public class HomeFragment extends Fragment {
                     if (papers == null || papers.isEmpty()) {
                         hasMorePages = false;
                         binding.recyclerPapers.setVisibility(View.GONE);
+                        if (binding.cardFeatured != null) {
+                            binding.cardFeatured.getRoot().setVisibility(View.GONE);
+                        }
                         binding.layoutEmpty.setVisibility(View.VISIBLE);
                         binding.layoutError.setVisibility(View.GONE);
                     } else {
                         binding.recyclerPapers.setVisibility(View.VISIBLE);
                         binding.layoutEmpty.setVisibility(View.GONE);
                         binding.layoutError.setVisibility(View.GONE);
+
+                        // Bind featured hero paper from top real paper
+                        PaperItem featuredPaper = papers.get(0);
+                        bindFeaturedPaper(featuredPaper);
 
                         paperAdapter.setPapers(papers);
 
@@ -196,6 +203,44 @@ public class HomeFragment extends Fragment {
                 showErrorState();
             }
         });
+    }
+
+    private void bindFeaturedPaper(@NonNull PaperItem paper) {
+        if (binding == null || binding.cardFeatured == null) return;
+
+        binding.cardFeatured.getRoot().setVisibility(View.VISIBLE);
+
+        String cleanTitle = paper.getTitle() != null
+                ? paper.getTitle().replaceAll("\\s+", " ").trim()
+                : "Featured Paper";
+        binding.cardFeatured.tvFeaturedTitle.setText(cleanTitle);
+
+        String category = (paper.getPrimaryCategory() != null && !paper.getPrimaryCategory().isEmpty())
+                ? paper.getPrimaryCategory()
+                : currentCategory;
+        binding.cardFeatured.tvFeaturedCategory.setText(category);
+
+        binding.cardFeatured.tvFeaturedAuthor.setText(formatAuthors(paper));
+        binding.cardFeatured.tvFeaturedDate.setText(paper.getFormattedDate());
+
+        // Tap on featured card opens detailed bottom sheet modal
+        binding.cardFeatured.getRoot().setOnClickListener(v -> {
+            if (isAdded()) {
+                PaperDetailBottomSheet bottomSheet = PaperDetailBottomSheet.newInstance(paper);
+                bottomSheet.show(getParentFragmentManager(), "PaperDetailBottomSheet");
+            }
+        });
+    }
+
+    private String formatAuthors(PaperItem paper) {
+        List<String> authors = paper.getAuthors();
+        if (authors == null || authors.isEmpty()) {
+            return "ArXiv Researcher";
+        }
+        if (authors.size() == 1) {
+            return authors.get(0);
+        }
+        return authors.get(0) + " et al.";
     }
 
     private void loadMorePapers() {
@@ -234,8 +279,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void showErrorState() {
-        if (paperAdapter.getItemCount() == 0) {
+        if (paperAdapter == null || paperAdapter.getItemCount() == 0) {
             binding.recyclerPapers.setVisibility(View.GONE);
+            if (binding.cardFeatured != null) {
+                binding.cardFeatured.getRoot().setVisibility(View.GONE);
+            }
             binding.layoutError.setVisibility(View.VISIBLE);
             binding.layoutEmpty.setVisibility(View.GONE);
         } else {
