@@ -2,7 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -10,12 +11,13 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Settings &amp; System"
+            android:text="@string/settings_title"
             android:textColor="@color/primary"
-            android:textSize="22sp"
+            android:textSize="26sp"
             android:textStyle="bold" />
 
         <!-- Card: Appearance (Dark Mode) -->
@@ -23,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardCornerRadius="10dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="2dp"
             app:strokeColor="@color/border_light"
             app:strokeWidth="1dp">
@@ -34,6 +36,14 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="12dp"
+                    android:contentDescription="Dark Mode"
+                    android:src="@drawable/ic_dark_mode_moon"
+                    app:tint="@color/primary" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -47,7 +57,9 @@
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switch_dark_mode"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/primary"
+                    app:trackTint="@color/primary_border" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -55,8 +67,8 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardCornerRadius="10dp"
+            android:layout_marginTop="14dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="2dp"
             app:strokeColor="@color/border_light"
             app:strokeWidth="1dp">
@@ -67,31 +79,53 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_storage"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="Storage"
+                        android:src="@drawable/ic_storage_disk"
+                        app:tint="@color/primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_storage"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_cache_size"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="36dp"
                     android:layout_marginTop="4dp"
-                    android:text="0.00 MB (Offline PDFs &amp; SQLite Storage)"
+                    android:text="0.00 MB (Offline cached PDFs)"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="13sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_clear_cache"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="14dp"
                     android:text="@string/settings_clear_cache"
                     android:textColor="@color/primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="8dp"
+                    app:icon="@drawable/ic_delete_trash"
+                    app:iconGravity="textStart"
+                    app:iconTint="@color/primary"
                     app:strokeColor="@color/primary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -100,8 +134,8 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardCornerRadius="10dp"
+            android:layout_marginTop="14dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="2dp"
             app:strokeColor="@color/border_light"
             app:strokeWidth="1dp">
@@ -112,18 +146,34 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Project Information"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="Info"
+                        android:src="@drawable/ic_info_circle"
+                        app:tint="@color/primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Project Information"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="36dp"
+                    android:layout_marginTop="6dp"
                     android:text="@string/settings_about"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="13sp" />
@@ -131,18 +181,20 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Connected Gateway: ExpressJS (10.0.2.2:3001)"
+                    android:layout_marginStart="36dp"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/settings_gateway"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="36dp"
                     android:layout_marginTop="6dp"
                     android:text="@string/credit_arxiv"
                     android:textColor="?android:attr/textColorSecondary"
-                    android:textSize="11sp"
+                    android:textSize="11.5sp"
                     android:textStyle="italic" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

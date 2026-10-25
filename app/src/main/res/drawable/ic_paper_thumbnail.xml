@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="44dp"
+    android:height="56dp"
+    android:viewportWidth="44"
+    android:viewportHeight="56">
+    <!-- Paper Sheet Background -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#CBD5E1"
+        android:strokeWidth="1.2"
+        android:pathData="M3,2h27l11,11v39c0,2 -1.5,3.5 -3.5,3.5H3c-2,0 -3.5,-1.5 -3.5,-3.5V5.5C-0.5,3.5 1,2 3,2z" />
+    <!-- Folded Corner -->
+    <path
+        android:fillColor="#F1F5F9"
+        android:strokeColor="#CBD5E1"
+        android:strokeWidth="1"
+        android:pathData="M30,2v11h11z" />
+    <!-- Paper Title Line -->
+    <path
+        android:fillColor="#D32F2F"
+        android:pathData="M6,17h20v3H6z" />
+    <!-- Mock Abstract and Text Lines -->
+    <path
+        android:fillColor="#94A3B8"
+        android:pathData="M6,23h32v1.5H6z M6,27h32v1.5H6z M6,31h32v1.5H6z M6,36h14v1.5H6z M6,40h14v1.5H6z M6,44h14v1.5H6z M24,36h14v1.5H24z M24,40h14v1.5H24z M24,44h14v1.5H24z" />
+</vector>

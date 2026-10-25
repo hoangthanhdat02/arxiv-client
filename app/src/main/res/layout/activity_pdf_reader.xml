@@ -13,7 +13,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?android:attr/colorBackground"
         android:elevation="4dp"
-        app:navigationIcon="@android:drawable/ic_menu_revert"
+        app:navigationIcon="?attr/homeAsUpIndicator"
         app:title="Native PDF Reader"
         app:titleTextColor="?android:attr/textColorPrimary" />
 
@@ -55,7 +55,10 @@
             android:text="BibTeX"
             android:textColor="@color/primary"
             android:textSize="11sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:icon="@drawable/ic_code_bibtex"
+            app:iconSize="14dp"
+            app:iconTint="@color/primary" />
 
         <!-- Zoom Level Indicator Badge -->
         <TextView
@@ -324,7 +327,10 @@
             android:insetBottom="0dp"
             android:text="@string/btn_download"
             android:textColor="@color/primary"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            app:icon="@drawable/ic_picture_as_pdf"
+            app:iconSize="14dp"
+            app:iconTint="@color/primary" />
     </LinearLayout>
 
 </LinearLayout>

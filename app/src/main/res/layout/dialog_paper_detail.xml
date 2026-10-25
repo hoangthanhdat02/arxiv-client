@@ -123,11 +123,14 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
-            android:text="BibTeX"
+            android:text="@string/btn_copy_bibtex"
+            android:textColor="@color/primary"
             android:textSize="13sp"
             app:cornerRadius="10dp"
-            app:icon="@drawable/ic_content_copy"
-            app:iconGravity="textStart" />
+            app:icon="@drawable/ic_code_bibtex"
+            app:iconGravity="textStart"
+            app:iconTint="@color/primary"
+            app:strokeColor="@color/primary" />
 
         <ImageButton
             android:id="@+id/btn_detail_bookmark"

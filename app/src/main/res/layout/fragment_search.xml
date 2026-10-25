@@ -23,10 +23,11 @@
             android:paddingHorizontal="12dp">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:contentDescription="Search Icon"
-                android:src="@android:drawable/ic_menu_search" />
+                android:src="@drawable/ic_nav_search"
+                app:tint="?android:attr/textColorSecondary" />
 
             <EditText
                 android:id="@+id/et_search"
@@ -57,7 +58,8 @@
                 android:layout_height="36dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="Filters"
-                android:src="@android:drawable/ic_menu_manage" />
+                android:src="@drawable/ic_filter_sliders"
+                app:tint="@color/primary" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

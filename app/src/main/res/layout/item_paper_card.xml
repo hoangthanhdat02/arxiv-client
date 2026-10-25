@@ -35,7 +35,7 @@
                 android:paddingVertical="3dp"
                 android:text="cs.AI"
                 android:textColor="@color/badge_ai"
-                android:textSize="12sp"
+                android:textSize="11.5sp"
                 android:textStyle="bold" />
 
             <View
@@ -47,35 +47,57 @@
                 android:id="@+id/tv_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="15 Oct 2024"
+                android:text="2026-10-22"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- Paper Title -->
-        <TextView
-            android:id="@+id/tv_title"
+        <!-- Middle Row: Document Preview Thumbnail + Title & Authors -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:ellipsize="end"
-            android:maxLines="3"
-            android:text="Attention Is All You Need"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal">
 
-        <!-- Authors -->
-        <TextView
-            android:id="@+id/tv_authors"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:text="Ashish Vaswani, Noam Shazeer, Niki Parmar"
-            android:textColor="@color/secondary"
-            android:textSize="13sp" />
+            <ImageView
+                android:id="@+id/img_paper_thumb"
+                android:layout_width="44dp"
+                android:layout_height="56dp"
+                android:layout_marginEnd="12dp"
+                android:contentDescription="Document Preview"
+                android:src="@drawable/ic_paper_thumbnail" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- Paper Title -->
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="3"
+                    android:text="Attention Is All You Need"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <!-- Authors -->
+                <TextView
+                    android:id="@+id/tv_authors"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="Ashish Vaswani, Noam Shazeer, Niki Parmar"
+                    android:textColor="@color/author_blue"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+        </LinearLayout>
 
         <!-- Abstract Snippet -->
         <TextView
@@ -87,7 +109,7 @@
             android:maxLines="3"
             android:text="The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration..."
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="13sp" />
+            android:textSize="12.5sp" />
 
         <!-- Personal Note Container -->
         <LinearLayout
@@ -105,7 +127,7 @@
             <ImageView
                 android:layout_width="14dp"
                 android:layout_height="14dp"
-                android:src="@android:drawable/ic_menu_edit"
+                android:src="@drawable/ic_edit_pencil"
                 app:tint="@color/primary" />
 
             <TextView
@@ -134,11 +156,12 @@
                 android:id="@+id/btn_read_pdf"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="38dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:text="@string/btn_read_pdf"
                 android:textSize="12sp"
+                app:backgroundTint="@color/primary"
                 app:cornerRadius="8dp"
                 app:icon="@drawable/ic_picture_as_pdf"
                 app:iconGravity="textStart"
@@ -150,16 +173,19 @@
                 android:id="@+id/btn_bibtex"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="38dp"
                 android:layout_marginStart="8dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                android:text="BibTeX"
+                android:text="@string/btn_copy_bibtex"
+                android:textColor="@color/primary"
                 android:textSize="12sp"
                 app:cornerRadius="8dp"
-                app:icon="@drawable/ic_content_copy"
+                app:icon="@drawable/ic_code_bibtex"
                 app:iconGravity="textStart"
-                app:iconSize="14dp" />
+                app:iconSize="14dp"
+                app:iconTint="@color/primary"
+                app:strokeColor="@color/primary" />
 
             <View
                 android:layout_width="0dp"
@@ -169,34 +195,34 @@
             <!-- Note Button -->
             <ImageButton
                 android:id="@+id/btn_note"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="Note"
-                android:padding="12dp"
+                android:padding="10dp"
                 android:scaleType="fitCenter"
-                android:src="@android:drawable/ic_menu_edit"
+                android:src="@drawable/ic_edit_pencil"
                 app:tint="?android:attr/textColorSecondary" />
 
-            <!-- Bookmark Button (48dp Touch Target) -->
+            <!-- Bookmark Button (44dp Touch Target) -->
             <ImageButton
                 android:id="@+id/btn_bookmark"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="Bookmark"
-                android:padding="12dp"
+                android:padding="10dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_bookmark_border" />
 
-            <!-- Share Button (48dp Touch Target) -->
+            <!-- Share Button (44dp Touch Target) -->
             <ImageButton
                 android:id="@+id/btn_share"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="Share"
-                android:padding="12dp"
+                android:padding="10dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_share" />
 
