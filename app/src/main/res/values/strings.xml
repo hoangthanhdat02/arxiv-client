@@ -29,9 +29,9 @@
 
     <!-- Library Screen -->
     <string name="library_title">Saved Library</string>
-    <string name="library_subtitle">Saved papers • Offline ready</string>
+    <string name="library_subtitle">Your bookmarked research papers</string>
     <string name="empty_library">No saved papers yet</string>
-    <string name="empty_library_hint">Save papers to read offline even in Airplane Mode</string>
+    <string name="empty_library_hint">Bookmark papers to access them quickly anytime</string>
     <string name="filter_chip_all">All</string>
 
     <!-- Buttons & Card Actions -->
@@ -54,6 +54,7 @@
     <string name="credit_arxiv">Open-access scientific papers provided by arXiv.org</string>
 
     <!-- Network & Feedback Messages -->
+    <string name="error_network_connection">Unable to connect to server. Please check your network connection.</string>
     <string name="error_network_title">Cannot connect to ExpressJS Backend</string>
     <string name="error_network_hint">Please check network connection or verify that ExpressJS server is running on port 3001 (10.0.2.2:3001)</string>
     <string name="paper_detail_title">Paper Details</string>

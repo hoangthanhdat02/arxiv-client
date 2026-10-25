@@ -174,7 +174,7 @@
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:alpha="0.5"
-                android:contentDescription="Error"
+                android:contentDescription="@null"
                 android:src="@android:drawable/stat_notify_error" />
 
             <TextView

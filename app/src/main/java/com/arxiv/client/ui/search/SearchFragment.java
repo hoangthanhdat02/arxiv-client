@@ -300,12 +300,12 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
             @Override
             public void onFailure(Call<PaperResponse> call, Throwable t) {
                 isLoading = false;
-                if (call.isCanceled())
+                if (call.isCanceled() || !isAdded())
                     return;
                 if (isNewSearch) {
                     showState(State.ERROR);
                     if (tvErrorMessage != null) {
-                        tvErrorMessage.setText("Network error: Please verify ExpressJS server (10.0.2.2:3001)");
+                        tvErrorMessage.setText(R.string.error_network_connection);
                     }
                 }
             }

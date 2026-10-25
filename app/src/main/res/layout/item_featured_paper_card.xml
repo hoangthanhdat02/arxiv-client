@@ -24,7 +24,7 @@
             android:layout_width="125dp"
             android:layout_height="150dp"
             android:layout_gravity="end"
-            android:contentDescription="Artificial Intelligence Robot"
+            android:contentDescription="@null"
             android:scaleType="centerCrop"
             android:src="@drawable/img_featured_robot" />
 
@@ -66,7 +66,7 @@
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:contentDescription="Pin Icon"
+                        android:contentDescription="@null"
                         android:src="@drawable/ic_pin_featured"
                         app:tint="#FF5252" />
 
