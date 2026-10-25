@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
     android:orientation="vertical">
 
     <!-- Top App Bar: Brand Logo & Notification Bell -->
@@ -37,16 +38,6 @@
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="12sp" />
         </LinearLayout>
-
-        <!-- Notification Bell -->
-        <ImageButton
-            android:id="@+id/btn_notification"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?selectableItemBackgroundBorderless"
-            android:contentDescription="Notifications"
-            android:src="@drawable/ic_bell_outline"
-            app:tint="?android:attr/textColorPrimary" />
     </LinearLayout>
 
     <!-- Category Selector Pill Tabs (cs.AI vs cs.LG) -->
@@ -87,34 +78,27 @@
         </com.google.android.material.tabs.TabLayout>
     </FrameLayout>
 
+    <!-- Featured / Pinned Paper Hero Card (Matching Mockup) -->
+    <include
+        android:id="@+id/card_featured"
+        layout="@layout/item_featured_paper_card"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="6dp" />
+
     <!-- Section Header: Latest Papers -->
-    <LinearLayout
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
         android:paddingHorizontal="16dp"
         android:paddingTop="8dp"
-        android:paddingBottom="4dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/section_latest_papers"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="17sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tv_see_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_see_all"
-            android:textColor="@color/primary"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+        android:paddingBottom="4dp"
+        android:text="@string/section_latest_papers"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="17sp"
+        android:textStyle="bold" />
 
     <!-- Main Content Frame (SwipeRefresh, Shimmer, Error, Empty) -->
     <FrameLayout

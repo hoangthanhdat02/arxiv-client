@@ -11,6 +11,7 @@
     <string name="feed_title_ai">ARTIFICIAL INTELLIGENCE (CS.AI)</string>
     <string name="feed_title_lg">MACHINE LEARNING (CS.LG)</string>
     <string name="featured_paper_badge">Featured Paper</string>
+    <string name="featured_badge">Featured</string>
     <string name="section_latest_papers">Latest Papers</string>
     <string name="btn_see_all">See all ></string>
 

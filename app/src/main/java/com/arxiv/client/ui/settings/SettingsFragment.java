@@ -2,7 +2,6 @@ package com.arxiv.client.ui.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,15 +37,19 @@ public class SettingsFragment extends Fragment {
         prefs = requireContext().getSharedPreferences("arxiv_prefs", Context.MODE_PRIVATE);
 
         // Dark mode setup
-        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        boolean isNight = (currentNightMode == Configuration.UI_MODE_NIGHT_YES);
-        switchDarkMode.setChecked(isNight);
+        boolean isDarkMode = prefs.getBoolean("dark_mode", false);
+        switchDarkMode.setOnCheckedChangeListener(null);
+        switchDarkMode.setChecked(isDarkMode);
 
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean("dark_mode", isChecked).apply();
-            AppCompatDelegate.setDefaultNightMode(isChecked
-                    ? AppCompatDelegate.MODE_NIGHT_YES
-                    : AppCompatDelegate.MODE_NIGHT_NO);
+            if (!buttonView.isPressed()) return;
+            boolean currentlySaved = prefs.getBoolean("dark_mode", false);
+            if (isChecked != currentlySaved) {
+                prefs.edit().putBoolean("dark_mode", isChecked).apply();
+                AppCompatDelegate.setDefaultNightMode(isChecked
+                        ? AppCompatDelegate.MODE_NIGHT_YES
+                        : AppCompatDelegate.MODE_NIGHT_NO);
+            }
         });
 
         // Cache size display

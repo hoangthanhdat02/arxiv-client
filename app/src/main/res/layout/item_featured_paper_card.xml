@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_featured_root"
+    android:layout_width="match_parent"
+    android:layout_height="150dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="#16080A"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeColor="#3D1216"
+    app:strokeWidth="1dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:background="@drawable/bg_featured_card">
+
+        <!-- Robot Graphic on Right Side (Strictly constrained to 150dp height) -->
+        <ImageView
+            android:id="@+id/img_featured_robot"
+            android:layout_width="125dp"
+            android:layout_height="150dp"
+            android:layout_gravity="end"
+            android:contentDescription="Artificial Intelligence Robot"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_featured_robot" />
+
+        <!-- Gradient Fade Overlay between Robot and Text Area -->
+        <View
+            android:layout_width="50dp"
+            android:layout_height="150dp"
+            android:layout_gravity="end"
+            android:layout_marginEnd="95dp"
+            android:background="@drawable/gradient_robot_fade" />
+
+        <!-- Card Content Container -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="14dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="6dp">
+
+            <!-- Top Row: Pinned Badge & Category Badge -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Pinned / Featured Badge (Left) -->
+                <LinearLayout
+                    android:id="@+id/layout_pin_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/bg_featured_pin_badge"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp">
+
+                    <ImageView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:contentDescription="Pin Icon"
+                        android:src="@drawable/ic_pin_featured"
+                        app:tint="#FF5252" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/featured_badge"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Category Badge (Right) -->
+                <TextView
+                    android:id="@+id/tv_featured_category"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/bg_featured_category_badge"
+                    android:paddingHorizontal="9dp"
+                    android:paddingVertical="2.5dp"
+                    android:text="cs.AI"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <!-- Paper Title (High contrast, bold, 2 lines max) -->
+            <TextView
+                android:id="@+id/tv_featured_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="105dp"
+                android:ellipsize="end"
+                android:lineSpacingExtra="1dp"
+                android:maxLines="2"
+                android:text="Direct Pass@$k$ Optimization for Thought Pruning"
+                android:textColor="#FFFFFF"
+                android:textSize="14.5sp"
+                android:textStyle="bold" />
+
+            <!-- Author(s) -->
+            <TextView
+                android:id="@+id/tv_featured_author"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="105dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Mahdi Salmani et al."
+                android:textColor="#CFD8DC"
+                android:textSize="11.5sp" />
+
+            <!-- Published Date -->
+            <TextView
+                android:id="@+id/tv_featured_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="2026-10-22"
+                android:textColor="#90A4AE"
+                android:textSize="10.5sp" />
+
+        </LinearLayout>
+    </FrameLayout>
+
+</com.google.android.material.card.MaterialCardView>
