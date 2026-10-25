@@ -17,7 +17,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Thư Viện Đã Lưu"
+            android:text="Saved Library"
             android:textColor="@color/primary"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -26,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Lưu trữ ngoại tuyến SQLite nội bộ - Đọc tốt ở Chế độ Máy Bay (Airplane Mode)"
+            android:text="Local SQLite Offline Storage - Available in Airplane Mode"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp" />
     </LinearLayout>
@@ -54,21 +54,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="Tất cả" />
+                android:text="All" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_ai"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Trí tuệ nhân tạo (cs.AI)" />
+                android:text="cs.AI (Artificial Intelligence)" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_lg"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Học máy (cs.LG)" />
+                android:text="cs.LG (Machine Learning)" />
 
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>

@@ -1,16 +1,16 @@
 <resources>
     <string name="app_name">arXiv Client</string>
-    <string name="nav_home">Khám phá</string>
-    <string name="nav_search">Tìm kiếm</string>
-    <string name="nav_library">Đã lưu</string>
-    <string name="nav_settings">Cài đặt</string>
+    <string name="nav_home">Explore</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_library">Saved</string>
+    <string name="nav_settings">Settings</string>
 
     <string name="feed_title_ai">Artificial Intelligence (cs.AI)</string>
     <string name="feed_title_lg">Machine Learning (cs.LG)</string>
-    <string name="search_hint">Tìm bài báo, tác giả, mô hình...</string>
-    <string name="empty_search">Không tìm thấy bài báo phù hợp</string>
-    <string name="empty_library">Chưa có bài báo nào được lưu</string>
-    <string name="empty_library_hint">Lưu bài báo để đọc offline ngay cả khi ngắt mạng (Airplane Mode)</string>
+    <string name="search_hint">Search papers, authors, models...</string>
+    <string name="empty_search">No matching papers found</string>
+    <string name="empty_library">No saved papers yet</string>
+    <string name="empty_library_hint">Save papers to read offline even in Airplane Mode</string>
 
     <string name="btn_read_pdf">Read PDF</string>
     <string name="btn_download">Download</string>
@@ -20,11 +20,11 @@
     <string name="btn_copy_bibtex">Copy BibTeX</string>
     <string name="btn_share">Share</string>
 
-    <string name="settings_theme">Chế độ tối (Dark Mode)</string>
-    <string name="settings_storage">Bộ nhớ cache đã dùng</string>
-    <string name="settings_clear_cache">Dọn dẹp bộ nhớ</string>
-    <string name="settings_about">Đồ án môn Phát triển Ứng dụng Di động - Topic 28</string>
-    <string name="credit_arxiv">Dữ liệu bài báo mở được cung cấp bởi kho lưu trữ mở arXiv.org</string>
+    <string name="settings_theme">Dark Mode</string>
+    <string name="settings_storage">Cached Storage</string>
+    <string name="settings_clear_cache">Clear Storage Cache</string>
+    <string name="settings_about">Mobile Application Development - Topic 28</string>
+    <string name="credit_arxiv">Open-access scientific papers provided by arXiv.org</string>
 
     <string name="btn_retry">Retry</string>
     <string name="error_network_title">Cannot connect to ExpressJS Backend</string>

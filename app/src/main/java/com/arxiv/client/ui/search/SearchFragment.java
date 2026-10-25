@@ -305,7 +305,7 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
                 if (isNewSearch) {
                     showState(State.ERROR);
                     if (tvErrorMessage != null) {
-                        tvErrorMessage.setText("Lỗi mạng: Kiểm tra máy chủ ExpressJS (10.0.2.2:3001)");
+                        tvErrorMessage.setText("Network error: Please verify ExpressJS server (10.0.2.2:3001)");
                     }
                 }
             }
@@ -330,7 +330,7 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
     private void updateResultCount(int totalResults) {
         if (totalResults > 0) {
             tvResultCount.setVisibility(View.VISIBLE);
-            tvResultCount.setText(String.format("Tìm thấy %d kết quả", totalResults));
+            tvResultCount.setText(String.format(java.util.Locale.US, "Found %d papers", totalResults));
         } else {
             tvResultCount.setVisibility(View.GONE);
         }
@@ -356,7 +356,7 @@ public class SearchFragment extends Fragment implements FilterBottomSheetDialog.
 
         if (hasNonDefaultSort) {
             chipActiveSort.setVisibility(View.VISIBLE);
-            chipActiveSort.setText("submittedDate".equals(selectedSort) ? "Mới nhất" : selectedSort);
+            chipActiveSort.setText("submittedDate".equals(selectedSort) ? "Latest" : "Relevance");
         } else {
             chipActiveSort.setVisibility(View.GONE);
         }

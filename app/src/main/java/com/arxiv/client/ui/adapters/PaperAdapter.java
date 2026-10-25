@@ -119,7 +119,7 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
 
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context)
                 .setView(dialogView)
-                .setPositiveButton("Lưu ghi chú", (dialog, which) -> {
+                .setPositiveButton("Save Note", (dialog, which) -> {
                     String updatedNote = etNote.getText() != null ? etNote.getText().toString().trim() : "";
                     paper.setNote(updatedNote);
                     if (dbHelper.isBookmarked(paper.getId())) {
@@ -130,15 +130,15 @@ public class PaperAdapter extends RecyclerView.Adapter<PaperAdapter.PaperViewHol
                         dbHelper.saveBookmark(paper, updatedNote);
                     }
                     notifyItemChanged(position);
-                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Note saved", Toast.LENGTH_SHORT).show();
                     if (actionListener != null) {
                         actionListener.onNoteSaved(paper, position);
                     }
                 })
-                .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         if (!currentNote.trim().isEmpty()) {
-            builder.setNeutralButton("Xóa ghi chú", (dialog, which) -> {
+            builder.setNeutralButton("Delete Note", (dialog, which) -> {
                 paper.setNote("");
                 dbHelper.updateNote(paper.getId(), "");
                 notifyItemChanged(position);

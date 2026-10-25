@@ -122,8 +122,8 @@ public class LibraryFragment extends Fragment {
                     updateEmptyState();
 
                     // Snackbar with UNDO action
-                    Snackbar.make(recyclerLibrary, "Đã xóa khỏi Thư viện: " + removedPaper.getTitle(), Snackbar.LENGTH_LONG)
-                            .setAction("HOÀN TÁC", v -> {
+                    Snackbar.make(recyclerLibrary, "Removed from Library: " + removedPaper.getTitle(), Snackbar.LENGTH_LONG)
+                            .setAction("UNDO", v -> {
                                 dbHelper.saveBookmark(removedPaper, removedPaper.getNote());
                                 paperAdapter.insertPaperAt(position, removedPaper);
                                 updateEmptyState();

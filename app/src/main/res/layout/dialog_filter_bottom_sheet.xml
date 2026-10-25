@@ -17,7 +17,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bộ Lọc Tìm Kiếm"
+        android:text="Search Filters"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -27,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Chuyên mục arXiv:"
+        android:text="arXiv Category:"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp"
         android:textStyle="bold" />
@@ -46,21 +46,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Tất cả (AI &amp; LG)" />
+            android:text="All (AI &amp; LG)" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_ai"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="cs.AI (Trí tuệ nhân tạo)" />
+            android:text="cs.AI (Artificial Intelligence)" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_lg"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="cs.LG (Học máy)" />
+            android:text="cs.LG (Machine Learning)" />
     </com.google.android.material.chip.ChipGroup>
 
     <!-- Sort By -->
@@ -68,7 +68,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Sắp xếp kết quả theo:"
+        android:text="Sort Results By:"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp"
         android:textStyle="bold" />
@@ -84,13 +84,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Độ liên quan cao nhất" />
+            android:text="Most Relevant" />
 
         <RadioButton
             android:id="@+id/radio_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mới nhất (Ngày công bố)" />
+            android:text="Latest (Date Submitted)" />
     </RadioGroup>
 
     <!-- Action Buttons Row -->
@@ -107,7 +107,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="Đặt lại"
+            android:text="Reset"
             android:layout_marginEnd="8dp" />
 
         <!-- Apply button -->
@@ -116,7 +116,7 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:text="Áp dụng bộ lọc"
+            android:text="Apply Filters"
             app:cornerRadius="8dp" />
     </LinearLayout>
 

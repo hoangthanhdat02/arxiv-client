@@ -10,7 +10,7 @@
         android:id="@+id/tv_dialog_note_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ghi Chú Cá Nhân"
+        android:text="Personal Note"
         android:textColor="@color/primary"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -22,7 +22,7 @@
         android:layout_marginTop="4dp"
         android:ellipsize="end"
         android:maxLines="2"
-        android:text="Tên bài báo..."
+        android:text="Paper title..."
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="13sp" />
 
@@ -32,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:hint="Nhập nhận xét, ý tưởng hoặc tóm tắt..."
+        android:hint="Add notes, key findings, or annotations..."
         app:boxStrokeColor="@color/primary"
         app:counterEnabled="true"
         app:counterMaxLength="1000"
